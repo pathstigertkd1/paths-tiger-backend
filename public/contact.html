@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Contact Us - Paths Tiger Taekwondo Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .success-animation {
+            animation: fadeInOut 3s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-orange-500 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl">🦁</span>
+                    <span class="font-bold text-xl text-white">Paths Tiger Taekwondo Academy</span>
+                </div>
+                <div class="hidden md:block">
+                    <ul class="flex space-x-6">
+                        <li><a href="index.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Home</a></li>
+                        <li><a href="about.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">About</a></li>
+                        <li><a href="programs.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Programs</a></li>
+                        <li><a href="contact.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded bg-amber-600">Contact Us</a></li>
+                        <li><a href="gallery.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Gallery</a></li>
+                        <li><a href="schedule.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Schedule</a></li>
+                    </ul>
+                </div>
+                <a href="login.html" class="text-white px-4 py-2 hover:bg-purple-950 transition bg-amber-950 rounded-2xl">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-orange-500 text-white py-16">
+        <div class="max-w-7xl mx-auto text-center px-4">
+            <h1 class="text-5xl font-black mb-4">Contact <span class="text-black">Us</span></h1>
+            <p class="text-xl max-w-3xl mx-auto">We'd love to hear from you. Get in touch today!</p>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="max-w-7xl mx-auto px-4 py-16">
+        <div class="grid md:grid-cols-2 gap-8">
+            
+            <!-- Contact Form -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-6">Send us a Message</h2>
+                
+                <!-- Success Message (hidden by default) -->
+                <div id="successMessage" class="hidden success-animation mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">✅</span>
+                        <div>
+                            <p class="font-bold">Message sent successfully!</p>
+                            <p class="text-sm">We'll get back to you within 24 hours.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Message (hidden by default) -->
+                <div id="errorMessage" class="hidden mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">❌</span>
+                        <div>
+                            <p class="font-bold">Failed to send message</p>
+                            <p class="text-sm" id="errorText">Please try again or call us directly.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="contactForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Your Name *</label>
+                        <input type="text" id="name" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600 focus:outline-none"
+                               placeholder="Enter your full name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Email Address *</label>
+                        <input type="email" id="email" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600 focus:outline-none"
+                               placeholder="your@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Phone Number</label>
+                        <input type="tel" id="phone" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600 focus:outline-none"
+                               placeholder="0317-4084613">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Interested In</label>
+                        <select id="subject" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600 focus:outline-none">
+                            <option value="Little Tigers (Ages 3-5)">Little Tigers (Ages 3-5)</option>
+                            <option value="Junior Program (Ages 6-12)">Junior Program (Ages 6-12)</option>
+                            <option value="Teen/Adult Program">Teen/Adult Program</option>
+                            <option value="Family Classes">Family Classes</option>
+                            <option value="General Information">General Information</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Message *</label>
+                        <textarea id="message" rows="4" required 
+                                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600 focus:outline-none"
+                                  placeholder="Tell us how we can help..."></textarea>
+                    </div>
+                    <button type="submit" id="submitButton" 
+                            class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700 transition flex items-center justify-center">
+                        <span id="buttonText">Send Message</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Contact Info & Map -->
+            <div class="space-y-6">
+                <!-- Contact Info Cards -->
+                <div class="bg-orange-50 p-6 rounded-2xl">
+                    <h2 class="text-2xl font-bold mb-4">Contact Information</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-2xl">📍</span>
+                            <div>
+                                <p class="font-semibold">Address:</p>
+                                <p class="text-gray-600">Hospital Road <br>Manga Mandi Lahore</p>
+                                <a href="https://maps.google.com/?q=Hospital+Road+Manga+Mandi+Lahore" target="_blank" 
+                                   class="text-sm text-orange-600 hover:underline mt-1 inline-block">Get Directions →</a>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-2xl">📞</span>
+                            <div>
+                                <p class="font-semibold">Phone:</p>
+                                <a href="tel:03174084613" class="text-gray-600 hover:text-orange-600">0317-4084613</a>
+                                <p class="text-xs text-gray-500 mt-1">Available during academy hours</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-2xl">✉️</span>
+                            <div>
+                                <p class="font-semibold">Email:</p>
+                                <a href="mailto:pathstiger1@gmail.com" class="text-gray-600 hover:text-orange-600">pathstiger1@gmail.com</a>
+                                <p class="text-xs text-gray-500 mt-1">We reply within 24 hours</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hours -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl font-bold mb-4">Academy Hours</h2>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Monday - Friday:</span>
+                            <span class="font-semibold">3:00 PM - 8:00 PM</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Saturday:</span>
+                            <span class="font-semibold">9:00 AM - 1:00 PM</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Sunday:</span>
+                            <span class="font-semibold text-red-600">Closed</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-600 flex items-center">
+                            <span class="text-green-500 mr-2">🟢</span> 
+                            We're currently <span class="font-semibold mx-1">OPEN</span> (if within hours)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Google Map -->
+                <div class="h-80 bg-gray-300 rounded-2xl overflow-hidden shadow-lg">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13636.374219014495!2d74.0601252865327!3d31.301159273651987!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39185706b071549d%3A0x2454ab657170f454!2sManga%20Mandi%2C%20Pakistan!5e0!3m2!1sen!2sus!4v1773866759490!5m2!1sen!2sus" 
+                        width="100%" 
+                        height="100%" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade"
+                        class="w-full h-full">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="bg-gray-100 py-16">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked <span class="text-orange-600">Questions</span></h2>
+            <div class="space-y-4">
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <span class="text-orange-600 mr-2">🥋</span>
+                        What should I wear to my first class?
+                    </h3>
+                    <p class="text-gray-600 ml-8">Comfortable workout clothes like t-shirts and sweatpants are perfect for your first few classes. We'll help you get fitted for a uniform when you're ready.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <span class="text-orange-600 mr-2">🤔</span>
+                        Do I need any experience?
+                    </h3>
+                    <p class="text-gray-600 ml-8">Not at all! We welcome beginners of all ages. Our programs are designed to take you from white belt to black belt at your own pace.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <span class="text-orange-600 mr-2">📅</span>
+                        How do I book a trial class?
+                    </h3>
+                    <p class="text-gray-600 ml-8">Simply fill out the contact form or give us a call. We'll schedule a free trial class at a time that works for you.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <span class="text-orange-600 mr-2">💰</span>
+                        What are your membership fees?
+                    </h3>
+                    <p class="text-gray-600 ml-8">We offer flexible membership plans starting from Rs. 7,900/month. Check our <a href="schedule.html" class="text-orange-600 hover:underline">Schedule page</a> for details.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <span class="text-2xl font-bold">🐯 Paths Tiger</span>
+                    <p class="text-sm text-gray-400 mt-1">Taekwondo Academy</p>
+                </div>
+                <div class="text-sm text-gray-400">
+                    © 2026 All Rights Reserved | My Paths Tiger Taekwondo Academy
+                </div>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📘</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📷</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">▶️</a>
+                </div>
+            </div>
+            <div class="text-center text-sm text-gray-400 mt-4 pt-4 border-t border-gray-800">
+                <p>🏪 Open: Monday-Friday 3PM-8PM | Saturday 9AM-1PM | Sunday Closed</p>
+                <p class="mt-2">📍 Hospital Road, Manga Mandi Lahore | 📞 <a href="tel:03174084613" class="hover:text-white">0317-4084613</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Contact Form Script -->
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            // Hide any previous messages
+            successMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            
+            // Show loading state
+            submitButton.disabled = true;
+            buttonText.innerHTML = '<span class="loading"></span> Sending...';
+            
+            try {
+                // Send data to backend
+                const response = await fetch(`${API_BASE_URL}/contact`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        phone,
+                        subject,
+                        message
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success message
+                    successMessage.classList.remove('hidden');
+                    
+                    // Reset form
+                    document.getElementById('contactForm').reset();
+                    
+                    // Scroll to success message
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Reset button
+                    submitButton.disabled = false;
+                    buttonText.textContent = 'Send Message';
+                    
+                    // Auto-hide success message after 5 seconds
+                    setTimeout(() => {
+                        successMessage.classList.add('hidden');
+                    }, 5000);
+                    
+                } else {
+                    // Show error message
+                    errorMessage.classList.remove('hidden');
+                    errorText.textContent = data.message || 'Failed to send message. Please try again.';
+                    
+                    // Reset button
+                    submitButton.disabled = false;
+                    buttonText.textContent = 'Send Message';
+                    
+                    // Scroll to error message
+                    errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                
+            } catch (error) {
+                console.error('Contact form error:', error);
+                
+                // Show error message
+                errorMessage.classList.remove('hidden');
+                errorText.textContent = 'Connection error. Please make sure the backend server is running at ' + API_BASE_URL;
+                
+                // Reset button
+                submitButton.disabled = false;
+                buttonText.textContent = 'Send Message';
+                
+                // Scroll to error message
+                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+
+        // Check if user is logged in and pre-fill email if available
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user && user.email) {
+                document.getElementById('email').value = user.email;
+            }
+        });
+
+        // Update open/close status based on current time
+        function updateStatus() {
+            const now = new Date();
+            const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const currentTime = hours * 60 + minutes;
+            
+            let isOpen = false;
+            
+            if (day >= 1 && day <= 5) { // Monday to Friday
+                // 3:00 PM = 15:00 = 900 minutes
+                // 8:00 PM = 20:00 = 1200 minutes
+                isOpen = currentTime >= 900 && currentTime <= 1200;
+            } else if (day === 6) { // Saturday
+                // 9:00 AM = 9:00 = 540 minutes
+                // 1:00 PM = 13:00 = 780 minutes
+                isOpen = currentTime >= 540 && currentTime <= 780;
+            }
+            
+            const statusElement = document.querySelector('.text-gray-600 .font-semibold');
+            if (statusElement) {
+                statusElement.textContent = isOpen ? 'OPEN' : 'CLOSED';
+                statusElement.className = isOpen ? 'font-semibold mx-1 text-green-600' : 'font-semibold mx-1 text-red-600';
+            }
+        }
+        
+        // Update status on load
+        updateStatus();
+    </script>
+
+    <!-- WhatsApp Button -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <a href="https://wa.me/923174084613?text=Hi%20Paths%20Tiger%2C%20I%20have%20a%20question%20about%20your%20classes" 
+           target="_blank"
+           class="flex items-center justify-center w-14 h-14 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition transform hover:scale-110">
+            <span class="text-3xl">📱</span>
+        </a>
+    </div>
+</body>
+</html>

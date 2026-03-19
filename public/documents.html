@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Documents & Forms - Paths Tiger Taekwondo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <script>
+        // Check if user is logged in
+        if (sessionStorage.getItem('loggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+        
+        // Display user name
+        document.addEventListener('DOMContentLoaded', function() {
+            const userName = sessionStorage.getItem('userName') || 'Member';
+            const nameElements = document.querySelectorAll('.user-name');
+            nameElements.forEach(el => el.textContent = userName);
+        });
+        
+        // Logout function
+        function logout() {
+            sessionStorage.removeItem('loggedIn');
+            sessionStorage.removeItem('userEmail');
+            sessionStorage.removeItem('userName');
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-orange-500 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl">🦁</span>
+                    <span class="font-bold text-xl text-white">Paths Tiger Taekwondo Academy</span>
+                </div>
+                <div class="hidden md:block">
+                    <ul class="flex space-x-6">
+                        <li><a href="index.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Home</a></li>
+                        <li><a href="about.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">About</a></li>
+                        <li><a href="programs.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Programs</a></li>
+                        <li><a href="contact.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Contact Us</a></li>
+                        <li><a href="gallery.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Gallery</a></li>
+                        <li><a href="schedule.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Schedule</a></li>
+                    </ul>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-white text-sm">Welcome, <span class="user-name font-bold">Member</span>!</span>
+                    <a href="#" onclick="logout()" class="text-white px-4 py-2 hover:bg-purple-950 transition bg-amber-950 rounded-2xl">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-orange-500 text-white py-12">
+        <div class="max-w-7xl mx-auto text-center px-4">
+            <h1 class="text-4xl font-black mb-2">Documents <span class="text-black">& Forms</span></h1>
+            <p class="text-lg">Download all your training materials and forms</p>
+        </div>
+    </div>
+
+    <!-- Documents Library -->
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        
+        <!-- Search Bar -->
+        <div class="mb-8">
+            <div class="relative max-w-md mx-auto">
+                <input type="text" placeholder="Search documents..." class="w-full p-4 pl-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-orange-600 focus:outline-none">
+                <span class="absolute left-4 top-4 text-gray-400 text-xl">🔍</span>
+            </div>
+        </div>
+
+        <!-- Document Categories -->
+        <div class="grid md:grid-cols-3 gap-6">
+            
+            <!-- Category 1: Handbooks & Guides -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="bg-orange-600 text-white p-4">
+                    <h2 class="text-xl font-bold flex items-center">
+                        <span class="text-2xl mr-2">📚</span> Handbooks & Guides
+                    </h2>
+                </div>
+                <div class="p-4 space-y-3">
+                    <!-- Student Handbook - Sample PDF -->
+                    <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-red-500 mr-3 text-xl">📕</span>
+                            <div>
+                                <span class="font-medium">Student Handbook 2026</span>
+                                <p class="text-xs text-gray-500">Updated January 2026</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-orange-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                    
+                    <!-- Parent's Guide - Sample PDF -->
+                    <a href="https://www.africau.edu/images/default/sample.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-blue-500 mr-3 text-xl">📘</span>
+                            <div>
+                                <span class="font-medium">Parent's Guide</span>
+                                <p class="text-xs text-gray-500">For parents of Little Tigers</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-orange-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                    
+                    <!-- Home Practice Guide - Sample PDF -->
+                    <a href="https://www.orimi.com/pdf-test.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-green-500 mr-3 text-xl">📗</span>
+                            <div>
+                                <span class="font-medium">Home Practice Guide</span>
+                                <p class="text-xs text-gray-500">Daily drills and exercises</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-orange-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Category 2: Forms & Applications -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="bg-green-600 text-white p-4">
+                    <h2 class="text-xl font-bold flex items-center">
+                        <span class="text-2xl mr-2">📝</span> Forms & Applications
+                    </h2>
+                </div>
+                <div class="p-4 space-y-3">
+                    <!-- Membership Application - Sample PDF -->
+                    <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-blue-500 mr-3 text-xl">📋</span>
+                            <div>
+                                <span class="font-medium">Membership Application</span>
+                                <p class="text-xs text-gray-500">New student form</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-green-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                    
+                    <!-- Medical Release Form - Sample PDF -->
+                    <a href="https://www.africau.edu/images/default/sample.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-red-500 mr-3 text-xl">📋</span>
+                            <div>
+                                <span class="font-medium">Medical Release Form</span>
+                                <p class="text-xs text-gray-500">Required for all students</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-green-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                    
+                    <!-- Belt Testing Application - Sample PDF -->
+                    <a href="https://www.orimi.com/pdf-test.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-purple-500 mr-3 text-xl">📋</span>
+                            <div>
+                                <span class="font-medium">Belt Testing Application</span>
+                                <p class="text-xs text-gray-500">For upcoming belt tests</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-green-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                    
+                    <!-- Tournament Registration - Sample PDF -->
+                    <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-orange-500 mr-3 text-xl">📋</span>
+                            <div>
+                                <span class="font-medium">Tournament Registration</span>
+                                <p class="text-xs text-gray-500">Competition entry form</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-green-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Category 3: Training Materials -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="bg-blue-600 text-white p-4">
+                    <h2 class="text-xl font-bold flex items-center">
+                        <span class="text-2xl mr-2">🥋</span> Training Materials
+                    </h2>
+                </div>
+                <div class="p-4 space-y-3">
+                    <!-- Belt Requirements - Sample PDF -->
+                    <a href="https://www.africau.edu/images/default/sample.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-yellow-600 mr-3 text-xl">📊</span>
+                            <div>
+                                <span class="font-medium">Belt Requirements</span>
+                                <p class="text-xs text-gray-500">All belt levels</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-blue-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                    
+                    <!-- Form Diagrams - Sample PDF -->
+                    <a href="https://www.orimi.com/pdf-test.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-green-600 mr-3 text-xl">📊</span>
+                            <div>
+                                <span class="font-medium">Form Diagrams (Poomsae)</span>
+                                <p class="text-xs text-gray-500">Step-by-step guides</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-blue-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                    
+                    <!-- Korean Terminology - Sample PDF -->
+                    <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-red-600 mr-3 text-xl">📊</span>
+                            <div>
+                                <span class="font-medium">Korean Terminology</span>
+                                <p class="text-xs text-gray-500">Commands and counting</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-blue-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                    
+                    <!-- Sparring Combinations - Sample PDF -->
+                    <a href="https://www.africau.edu/images/default/sample.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition group">
+                        <div class="flex items-center">
+                            <span class="text-purple-600 mr-3 text-xl">📊</span>
+                            <div>
+                                <span class="font-medium">Sparring Combinations</span>
+                                <p class="text-xs text-gray-500">Advanced techniques</p>
+                            </div>
+                        </div>
+                        <span class="text-sm bg-white px-3 py-1 rounded-full group-hover:bg-blue-100 flex items-center">
+                            📥 PDF
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Documents Section -->
+        <div class="mt-12">
+            <h2 class="text-2xl font-bold mb-6">Recently <span class="text-orange-600">Added</span></h2>
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="space-y-4">
+                    <!-- March 2026 Schedule Update -->
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="flex items-center">
+                            <span class="text-green-500 mr-3 text-2xl">🆕</span>
+                            <div>
+                                <span class="font-semibold">March 2026 Schedule Update</span>
+                                <p class="text-xs text-gray-500">Added 2 days ago</p>
+                            </div>
+                        </div>
+                        <a href="https://www.orimi.com/pdf-test.pdf" target="_blank" class="bg-orange-600 text-white px-4 py-2 rounded-full text-sm hover:bg-orange-700 flex items-center">
+                            📥 Download
+                        </a>
+                    </div>
+                    
+                    <!-- Spring Tournament Info Packet -->
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="flex items-center">
+                            <span class="text-green-500 mr-3 text-2xl">🆕</span>
+                            <div>
+                                <span class="font-semibold">Spring Tournament Info Packet</span>
+                                <p class="text-xs text-gray-500">Added 5 days ago</p>
+                            </div>
+                        </div>
+                        <a href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" target="_blank" class="bg-orange-600 text-white px-4 py-2 rounded-full text-sm hover:bg-orange-700 flex items-center">
+                            📥 Download
+                        </a>
+                    </div>
+                    
+                    <!-- Updated Medical Release Form -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-green-500 mr-3 text-2xl">🆕</span>
+                            <div>
+                                <span class="font-semibold">Updated Medical Release Form</span>
+                                <p class="text-xs text-gray-500">Added 1 week ago</p>
+                            </div>
+                        </div>
+                        <a href="https://www.africau.edu/images/default/sample.pdf" target="_blank" class="bg-orange-600 text-white px-4 py-2 rounded-full text-sm hover:bg-orange-700 flex items-center">
+                            📥 Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="mt-12 bg-orange-50 rounded-2xl p-8">
+            <h2 class="text-2xl font-bold mb-4">Need a specific form?</h2>
+            <p class="text-gray-600 mb-4">Can't find what you're looking for? Contact us and we'll help you out.</p>
+            <div class="flex gap-4">
+                <a href="contact.html" class="bg-orange-600 text-white px-6 py-3 rounded-full hover:bg-orange-700">Contact Support</a>
+                <a href="#" class="bg-gray-600 text-white px-6 py-3 rounded-full hover:bg-gray-700">Request Document</a>
+            </div>
+        </div>
+
+   
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <span class="text-2xl font-bold">🐯 Paths Tiger</span>
+                    <p class="text-sm text-gray-400 mt-1">Taekwondo Academy</p>
+                </div>
+                <div class="text-sm text-gray-400">
+                    © 2026 All Rights Reserved | My Paths Tiger Taekwondo Academy
+                </div>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📘</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📷</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">▶️</a>
+                </div>
+            </div>
+            <div class="text-center text-sm text-gray-400 mt-4 pt-4 border-t border-gray-800">
+                <p>🏪 Open: Monday-Friday 3PM-8PM | Saturday 9AM-1PM | Sunday Closed</p>
+                <p class="mt-2">📍 Hospital Road, Manga Mandi Lahore | 📞 <a href="tel:03174084613" class="hover:text-white">0317-4084613</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Button -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <a href="https://wa.me/923174084613?text=Hi%20Paths%20Tiger%2C%20I%20need%20help%20with%20documents" 
+           target="_blank"
+           class="flex items-center justify-center w-14 h-14 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition transform hover:scale-110">
+            <span class="text-3xl">📱</span>
+        </a>
+    </div>
+
+</body>
+</html>

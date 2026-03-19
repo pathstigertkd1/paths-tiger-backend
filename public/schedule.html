@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Schedule - Paths Tiger Taekwondo Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-orange-500 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl">🦁</span>
+                    <span class="font-bold text-xl text-white">Paths Tiger Taekwondo Academy</span>
+                </div>
+                <div class="hidden md:block">
+                    <ul class="flex space-x-6">
+                        <li><a href="index.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Home</a></li>
+                        <li><a href="about.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">About</a></li>
+                        <li><a href="programs.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Programs</a></li>
+                        <li><a href="contact.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Contact Us</a></li>
+                        <li><a href="gallery.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Gallery</a></li>
+                        <li><a href="schedule.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded bg-amber-600">Schedule</a></li>
+                    </ul>
+                </div>
+                <a href="login.html" class="text-white px-4 py-2 hover:bg-purple-950 transition bg-amber-950 rounded-2xl">
+                    Login
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-orange-500 text-white py-16">
+        <div class="max-w-7xl mx-auto text-center px-4">
+            <h1 class="text-5xl font-black mb-4">Class <span class="text-black">Schedule</span></h1>
+            <p class="text-xl max-w-3xl mx-auto">Find the perfect class time for your family</p>
+        </div>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex flex-wrap gap-2 justify-center">
+            <button onclick="filterClasses('all')" class="px-4 py-2 bg-orange-600 text-white rounded-full">All Classes</button>
+            <button onclick="filterClasses('Little Tigers')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full">Little Tigers</button>
+            <button onclick="filterClasses('Junior')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full">Junior</button>
+            <button onclick="filterClasses('Teen/Adult')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full">Teen/Adult</button>
+            <button onclick="filterClasses('Family')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full">Family</button>
+        </div>
+    </div>
+
+    <!-- Schedule Table -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-orange-600 text-white">
+                    <tr>
+                        <th class="p-4 text-left">Time</th>
+                        <th class="p-4">Monday</th>
+                        <th class="p-4">Tuesday</th>
+                        <th class="p-4">Wednesday</th>
+                        <th class="p-4">Thursday</th>
+                        <th class="p-4">Friday</th>
+                        <th class="p-4">Saturday</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    <!-- 4:00 PM -->
+                    <tr class="border-b">
+                        <td class="p-4 font-bold text-left">4:00 PM</td>
+                        <td class="p-4 bg-orange-50">Little Tigers<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
+                        <td class="p-4 bg-green-50">Junior<br><span class="text-xs text-gray-500">Ages 6-12</span></td>
+                        <td class="p-4 bg-orange-50">Little Tigers<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
+                        <td class="p-4 bg-green-50">Junior<br><span class="text-xs text-gray-500">Ages 6-12</span></td>
+                        <td class="p-4 bg-blue-50">Family<br><span class="text-xs text-gray-500">All Ages</span></td>
+                        <td class="p-4">-</td>
+                    </tr>
+                    <!-- 5:00 PM -->
+                    <tr class="border-b">
+                        <td class="p-4 font-bold text-left">5:00 PM</td>
+                        <td class="p-4 bg-green-50">Junior<br><span class="text-xs text-gray-500">Ages 6-12</span></td>
+                        <td class="p-4 bg-orange-50">Little Tigers<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
+                        <td class="p-4 bg-green-50">Junior<br><span class="text-xs text-gray-500">Ages 6-12</span></td>
+                        <td class="p-4 bg-orange-50">Little Tigers<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
+                        <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 13+</span></td>
+                        <td class="p-4">-</td>
+                    </tr>
+                    <!-- 6:00 PM -->
+                    <tr class="border-b">
+                        <td class="p-4 font-bold text-left">6:00 PM</td>
+                        <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 13+</span></td>
+                        <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 13+</span></td>
+                        <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 13+</span></td>
+                        <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 13+</span></td>
+                        <td class="p-4">-</td>
+                        <td class="p-4">-</td>
+                    </tr>
+                    <!-- 10:00 AM Saturday -->
+                    <tr class="border-b">
+                        <td class="p-4 font-bold text-left">10:00 AM</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4 bg-orange-50">Little Tigers<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
+                    </tr>
+                    <!-- 11:00 AM Saturday -->
+                    <tr>
+                        <td class="p-4 font-bold text-left">11:00 AM</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4">-</td>
+                        <td class="p-4 bg-green-50">Junior<br><span class="text-xs text-gray-500">Ages 6-12</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-sm text-gray-500 mt-4 text-center">All classes are 45-60 minutes unless noted. Schedule subject to change.</p>
+    </div>
+
+    <!-- Pricing Section -->
+    <div class="bg-gray-100 py-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4">Membership <span class="text-orange-600">Plans</span></h2>
+            <p class="text-center text-gray-600 mb-12">Flexible options to fit your family's needs</p>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Basic Plan -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg text-center">
+                    <h3 class="text-xl font-bold mb-2">Basic</h3>
+                    <p class="text-3xl font-bold text-orange-600 mb-4">Rs. 7,900<span class="text-sm text-gray-500">/mo</span></p>
+                    <ul class="text-left mb-6 space-y-2">
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 2 classes per week</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Uniform discount</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Basic belt testing</li>
+                        <li class="flex items-center text-gray-400"><span class="text-red-500 mr-2">✗</span> Tournament entry</li>
+                    </ul>
+                    <a href="register.html" class="block w-full bg-orange-600 text-white py-2 rounded-full hover:bg-orange-700">Enroll Now</a>
+                </div>
+
+                <!-- Family Plan (Popular) -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg text-center border-4 border-orange-600 relative">
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-orange-600 text-white px-4 py-1 rounded-full text-sm">Most Popular</div>
+                    <h3 class="text-xl font-bold mb-2">Family</h3>
+                    <p class="text-3xl font-bold text-orange-600 mb-4">Rs. 14,900<span class="text-sm text-gray-500">/mo</span></p>
+                    <ul class="text-left mb-6 space-y-2">
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Up to 4 family members</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 3 classes per week each</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Uniforms included</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> All belt testing</li>
+                    </ul>
+                    <a href="register.html" class="block w-full bg-orange-600 text-white py-2 rounded-full hover:bg-orange-700">Enroll Now</a>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg text-center">
+                    <h3 class="text-xl font-bold mb-2">Premium</h3>
+                    <p class="text-3xl font-bold text-orange-600 mb-4">Rs. 12,900<span class="text-sm text-gray-500">/mo</span></p>
+                    <ul class="text-left mb-6 space-y-2">
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Unlimited classes</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Private lesson included</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Tournament training</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Gear discount</li>
+                    </ul>
+                    <a href="register.html" class="block w-full bg-orange-600 text-white py-2 rounded-full hover:bg-orange-700">Enroll Now</a>
+                </div>
+            </div>
+
+            <!-- Trial Offer -->
+            <div class="text-center mt-8">
+                <p class="text-lg">Not sure? <span class="font-bold text-orange-600">Try your first class FREE!</span></p>
+                <a href="contact.html" class="inline-block mt-2 text-orange-600 hover:underline">Contact us to schedule →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <span class="text-2xl font-bold">🐯 Paths Tiger</span>
+                    <p class="text-sm text-gray-400 mt-1">Taekwondo Academy</p>
+                </div>
+                <div class="text-sm text-gray-400">
+                    © 2026 All Rights Reserved | My Paths Tiger Taekwondo Academy
+                </div>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📘</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📷</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">▶️</a>
+                </div>
+            </div>
+            <div class="text-center text-sm text-gray-400 mt-4 pt-4 border-t border-gray-800">
+                <p>🏪 Open: Monday-Friday 3PM-8PM | Saturday 9AM-1PM | Sunday Closed</p>
+                <p class="mt-2">📍 Hospital Road, Manga Mandi Lahore | 📞 <a href="tel:03174084613" class="hover:text-white">0317-4084613</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Filter Script -->
+    <script>
+        function filterClasses(level) {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                if(level === 'all') {
+                    row.style.display = '';
+                } else {
+                    const cells = row.querySelectorAll('td');
+                    let hasClass = false;
+                    for(let i = 1; i < cells.length; i++) {
+                        if(cells[i].textContent.includes(level)) {
+                            hasClass = true;
+                            break;
+                        }
+                    }
+                    row.style.display = hasClass ? '' : 'none';
+                }
+            });
+        }
+    </script>
+
+    <!-- WhatsApp Button -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <a href="https://wa.me/923174084613?text=Hi%20Paths%20Tiger%2C%20I'm%20interested%20in%20your%20class%20schedule" 
+           target="_blank"
+           class="flex items-center justify-center w-14 h-14 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition transform hover:scale-110">
+            <span class="text-3xl">📱</span>
+        </a>
+    </div>
+
+</body>
+</html>
