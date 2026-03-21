@@ -1,6 +1,6 @@
 // ============================================
 // PATHS TIGER TAEKWONDO ACADEMY - COMPLETE BACKEND
-// Single File Version - Everything in one place!
+// Single File Version - With Admin & Instructor Routes
 // ============================================
 
 const express = require('express');
@@ -13,7 +13,7 @@ const crypto = require('crypto');
 const axios = require('axios');
 const qs = require('qs');
 const moment = require('moment');
-const path = require('path'); // ADD THIS - for file paths
+const path = require('path');
 
 const app = express();
 const PORT = 5000;
@@ -29,30 +29,23 @@ app.use(cors({
 }));
 
 // ============================================
-// SERVE STATIC FILES (YOUR HTML PAGES)
+// SERVE STATIC FILES
 // ============================================
-
-// Serve files from "public" folder (where your HTML files will go)
 app.use(express.static('public'));
-
-// Serve images from "images" folder
 app.use('/images', express.static('images'));
-
-// Optional: Also serve from current directory if needed
 app.use(express.static(__dirname));
 
-// Redirect root to index.html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ============================================
-// DATABASE CONNECTION (MySQL)
+// DATABASE CONNECTION
 // ============================================
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'root123', // Change this to your MySQL password
+    password: 'root123',
     database: 'paths_tiger_db'
 });
 
@@ -62,8 +55,6 @@ db.connect((err) => {
         return;
     }
     console.log('✅ Connected to MySQL database');
-    
-    // Create tables if they don't exist
     createTables();
 });
 
@@ -71,7 +62,7 @@ db.connect((err) => {
 // CREATE DATABASE TABLES
 // ============================================
 function createTables() {
-    // Members table
+    // Members table (includes role field for admin/instructor/member)
     db.query(`
         CREATE TABLE IF NOT EXISTS members (
             id INT PRIMARY KEY AUTO_INCREMENT,
@@ -83,6 +74,7 @@ function createTables() {
             dateOfBirth DATE,
             beltLevel ENUM('white','yellow','green','blue','red','black') DEFAULT 'white',
             joinDate DATE,
+            program VARCHAR(50) DEFAULT 'Little Tigers',
             emergencyContact VARCHAR(100),
             emergencyPhone VARCHAR(20),
             isActive BOOLEAN DEFAULT true,
@@ -185,7 +177,7 @@ const transporter = nodemailer.createTransport({
     secure: false,
     auth: {
         user: 'pathstiger1@gmail.com',
-        pass: 'your_app_password_here' // Replace with your Gmail App Password
+        pass: 'your_app_password_here'
     }
 });
 
@@ -196,7 +188,6 @@ function sendEmail(to, subject, html) {
         subject,
         html
     };
-    
     return transporter.sendMail(mailOptions);
 }
 
@@ -237,7 +228,7 @@ function authenticateToken(req, res, next) {
         return res.status(403).json({ success: false, message: 'Invalid token' });
     }
     
-    db.query('SELECT id, name, email, phone, beltLevel, role FROM members WHERE id = ?', 
+    db.query('SELECT id, name, email, phone, beltLevel, role, program FROM members WHERE id = ?', 
         [decoded.id], 
         (err, results) => {
             if (err || results.length === 0) {
@@ -249,36 +240,43 @@ function authenticateToken(req, res, next) {
     );
 }
 
+// Admin middleware
+function requireAdmin(req, res, next) {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+    next();
+}
+
+// Instructor middleware
+function requireInstructor(req, res, next) {
+    if (req.user.role !== 'instructor' && req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Instructor access required' });
+    }
+    next();
+}
+
 // ============================================
-// API ROUTES
+// PUBLIC ROUTES
 // ============================================
 
-// ---------- HEALTH CHECK ----------
 app.get('/api/health', (req, res) => {
-    res.json({ 
-        success: true, 
-        message: 'Paths Tiger API is running',
-        timestamp: new Date(),
-        version: '1.0.0'
-    });
+    res.json({ success: true, message: 'Paths Tiger API is running', timestamp: new Date(), version: '1.0.0' });
 });
 
-// ---------- REGISTER ----------
+// Register
 app.post('/api/auth/register', async (req, res) => {
     try {
-        const { name, email, password, phone, address, dateOfBirth } = req.body;
+        const { name, email, password, phone, address, dateOfBirth, program } = req.body;
         
-        // Check if user exists
         db.query('SELECT * FROM members WHERE email = ?', [email], async (err, results) => {
             if (err) throw err;
             if (results.length > 0) {
                 return res.status(400).json({ success: false, message: 'Email already registered' });
             }
             
-            // Hash password
             const hashedPassword = await bcrypt.hash(password, 10);
             
-            // Insert new member
             const member = {
                 name,
                 email,
@@ -288,13 +286,13 @@ app.post('/api/auth/register', async (req, res) => {
                 dateOfBirth,
                 joinDate: moment().format('YYYY-MM-DD'),
                 beltLevel: 'white',
+                program: program || 'Little Tigers',
                 role: 'member'
             };
             
             db.query('INSERT INTO members SET ?', member, (err, result) => {
                 if (err) throw err;
                 
-                // Create belt progress record
                 const beltProgress = {
                     memberId: result.insertId,
                     currentBelt: 'white',
@@ -311,10 +309,8 @@ app.post('/api/auth/register', async (req, res) => {
                     if (err) console.error('Error creating belt progress:', err);
                 });
                 
-                // Generate token
                 const token = generateToken({ id: result.insertId, email, role: 'member' });
                 
-                // Send welcome email
                 const welcomeEmail = `
                     <div style="font-family: Arial, sans-serif;">
                         <h2 style="color: #F97316;">Welcome to Paths Tiger Academy!</h2>
@@ -332,13 +328,7 @@ app.post('/api/auth/register', async (req, res) => {
                     success: true,
                     message: 'Registration successful',
                     token,
-                    user: {
-                        id: result.insertId,
-                        name,
-                        email,
-                        phone,
-                        beltLevel: 'white'
-                    }
+                    user: { id: result.insertId, name, email, phone, beltLevel: 'white', role: 'member' }
                 });
             });
         });
@@ -348,7 +338,7 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-// ---------- LOGIN ----------
+// Login
 app.post('/api/auth/login', (req, res) => {
     try {
         const { email, password } = req.body;
@@ -388,7 +378,7 @@ app.post('/api/auth/login', (req, res) => {
     }
 });
 
-// ---------- GET PROFILE ----------
+// Get profile
 app.get('/api/auth/profile', authenticateToken, (req, res) => {
     db.query(`
         SELECT m.*, bp.* 
@@ -399,18 +389,13 @@ app.get('/api/auth/profile', authenticateToken, (req, res) => {
         if (err) {
             return res.status(500).json({ success: false, message: 'Database error' });
         }
-        
         const user = results[0];
         delete user.password;
-        
-        res.json({
-            success: true,
-            user
-        });
+        res.json({ success: true, user });
     });
 });
 
-// ---------- UPDATE PROFILE ----------
+// Update profile
 app.put('/api/auth/profile', authenticateToken, (req, res) => {
     const { name, phone, address, emergencyContact, emergencyPhone } = req.body;
     
@@ -421,16 +406,12 @@ app.put('/api/auth/profile', authenticateToken, (req, res) => {
             if (err) {
                 return res.status(500).json({ success: false, message: 'Update failed' });
             }
-            
-            res.json({
-                success: true,
-                message: 'Profile updated successfully'
-            });
+            res.json({ success: true, message: 'Profile updated successfully' });
         }
     );
 });
 
-// ---------- CONTACT FORM ----------
+// Contact form
 app.post('/api/contact', (req, res) => {
     try {
         const { name, email, phone, subject, message } = req.body;
@@ -447,7 +428,6 @@ app.post('/api/contact', (req, res) => {
         db.query('INSERT INTO contacts SET ?', contact, (err, result) => {
             if (err) throw err;
             
-            // Send email to admin
             const adminEmail = `
                 <div style="font-family: Arial, sans-serif;">
                     <h2 style="color: #F97316;">New Contact Form Submission</h2>
@@ -462,7 +442,6 @@ app.post('/api/contact', (req, res) => {
             
             sendEmail('pathstiger1@gmail.com', 'New Contact Form Submission', adminEmail).catch(console.error);
             
-            // Send auto-reply to user
             const autoReply = `
                 <div style="font-family: Arial, sans-serif;">
                     <h2 style="color: #F97316;">Thank You for Contacting Us!</h2>
@@ -474,11 +453,7 @@ app.post('/api/contact', (req, res) => {
             
             sendEmail(email, 'Thank you for contacting Paths Tiger', autoReply).catch(console.error);
             
-            res.json({
-                success: true,
-                message: 'Message sent successfully',
-                contactId: result.insertId
-            });
+            res.json({ success: true, message: 'Message sent successfully', contactId: result.insertId });
         });
     } catch (error) {
         console.error('Contact form error:', error);
@@ -486,29 +461,26 @@ app.post('/api/contact', (req, res) => {
     }
 });
 
-// ---------- GET DASHBOARD ----------
+// ============================================
+// MEMBER ROUTES
+// ============================================
+
 app.get('/api/member/dashboard', authenticateToken, (req, res) => {
     const memberId = req.user.id;
     
-    // Get belt progress
     db.query('SELECT * FROM belt_progress WHERE memberId = ?', [memberId], (err, beltResults) => {
         if (err) console.error('Belt progress error:', err);
         
-        // Get recent payments
-        db.query('SELECT * FROM payments WHERE memberId = ? ORDER BY createdAt DESC LIMIT 5', 
-            [memberId], (err, paymentResults) => {
+        db.query('SELECT * FROM payments WHERE memberId = ? ORDER BY createdAt DESC LIMIT 5', [memberId], (err, paymentResults) => {
             if (err) console.error('Payment error:', err);
             
-            // Get attendance
-            db.query('SELECT COUNT(*) as total, SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present FROM attendance WHERE memberId = ? AND classDate >= DATE_SUB(NOW(), INTERVAL 30 DAY)', 
-                [memberId], (err, attendanceResults) => {
+            db.query('SELECT COUNT(*) as total, SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present FROM attendance WHERE memberId = ? AND classDate >= DATE_SUB(NOW(), INTERVAL 30 DAY)', [memberId], (err, attendanceResults) => {
                 if (err) console.error('Attendance error:', err);
                 
                 const total = attendanceResults[0]?.total || 0;
                 const present = attendanceResults[0]?.present || 0;
                 const attendanceRate = total > 0 ? Math.round((present / total) * 100) : 0;
                 
-                // Dashboard data
                 const dashboard = {
                     stats: {
                         classesAttended: present,
@@ -526,32 +498,229 @@ app.get('/api/member/dashboard', authenticateToken, (req, res) => {
                         { title: 'Academy Closed - March 23rd', description: 'Due to maintenance', date: '5 days ago', color: 'blue' },
                         { title: 'New Uniforms Arrived', description: 'Available for purchase at front desk', date: '1 week ago', color: 'green' }
                     ],
-                    beltProgress: beltResults[0] || {
-                        currentBelt: req.user.beltLevel,
-                        requirementsCompleted: {}
-                    },
+                    beltProgress: beltResults[0] || { currentBelt: req.user.beltLevel, requirementsCompleted: {} },
                     recentPayments: paymentResults || []
                 };
                 
-                res.json({
-                    success: true,
-                    dashboard
-                });
+                res.json({ success: true, dashboard });
             });
         });
     });
 });
 
-// ---------- JAZZCASH PAYMENT INITIATION ----------
+// ============================================
+// ADMIN ROUTES
+// ============================================
+
+// Get all members
+app.get('/api/admin/members', authenticateToken, requireAdmin, (req, res) => {
+    db.query('SELECT id, name, email, phone, beltLevel, program, joinDate, isActive, role FROM members ORDER BY id DESC', (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Get single member details
+app.get('/api/admin/members/:id', authenticateToken, requireAdmin, (req, res) => {
+    db.query('SELECT * FROM members WHERE id = ?', [req.params.id], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        if (results.length === 0) return res.status(404).json({ success: false, message: 'Member not found' });
+        delete results[0].password;
+        res.json(results[0]);
+    });
+});
+
+// Update member
+app.put('/api/admin/members/:id', authenticateToken, requireAdmin, (req, res) => {
+    const { name, email, phone, beltLevel, program, role, isActive } = req.body;
+    db.query('UPDATE members SET name=?, email=?, phone=?, beltLevel=?, program=?, role=?, isActive=? WHERE id=?',
+        [name, email, phone, beltLevel, program, role, isActive, req.params.id], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Update failed' });
+        res.json({ success: true, message: 'Member updated' });
+    });
+});
+
+// Delete member
+app.delete('/api/admin/members/:id', authenticateToken, requireAdmin, (req, res) => {
+    db.query('DELETE FROM members WHERE id = ?', [req.params.id], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Delete failed' });
+        res.json({ success: true, message: 'Member deleted' });
+    });
+});
+
+// Get all payments
+app.get('/api/admin/payments', authenticateToken, requireAdmin, (req, res) => {
+    db.query('SELECT * FROM payments ORDER BY createdAt DESC', (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Update payment status
+app.put('/api/admin/payments/:id', authenticateToken, requireAdmin, (req, res) => {
+    const { status } = req.body;
+    db.query('UPDATE payments SET status = ? WHERE id = ?', [status, req.params.id], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Update failed' });
+        res.json({ success: true, message: 'Payment status updated' });
+    });
+});
+
+// Get all contacts
+app.get('/api/admin/contacts', authenticateToken, requireAdmin, (req, res) => {
+    db.query('SELECT * FROM contacts ORDER BY createdAt DESC', (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Mark contact as read
+app.put('/api/admin/contacts/:id/read', authenticateToken, requireAdmin, (req, res) => {
+    db.query('UPDATE contacts SET status = "read" WHERE id = ?', [req.params.id], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Update failed' });
+        res.json({ success: true });
+    });
+});
+
+// Get dashboard stats
+app.get('/api/admin/stats', authenticateToken, requireAdmin, (req, res) => {
+    Promise.all([
+        new Promise((resolve) => db.query('SELECT COUNT(*) as total FROM members', (err, r) => resolve(r?.[0]?.total || 0))),
+        new Promise((resolve) => db.query('SELECT COUNT(*) as total FROM payments WHERE status = "pending"', (err, r) => resolve(r?.[0]?.total || 0))),
+        new Promise((resolve) => db.query('SELECT SUM(amount) as total FROM payments WHERE status = "completed"', (err, r) => resolve(r?.[0]?.total || 0))),
+        new Promise((resolve) => db.query('SELECT COUNT(*) as total FROM contacts WHERE status = "new"', (err, r) => resolve(r?.[0]?.total || 0)))
+    ]).then(([totalMembers, pendingPayments, totalRevenue, unreadMessages]) => {
+        res.json({ totalMembers, pendingPayments, totalRevenue, unreadMessages });
+    });
+});
+
+// ============================================
+// INSTRUCTOR ROUTES
+// ============================================
+
+// Get students by class
+app.get('/api/instructor/students', authenticateToken, requireInstructor, (req, res) => {
+    const classType = req.query.class;
+    let classCondition = '';
+    
+    if (classType === 'little_tigers') classCondition = 'program = "Little Tigers"';
+    else if (classType === 'junior') classCondition = 'program = "Junior Program"';
+    else if (classType === 'teen_adult') classCondition = 'program = "Teen/Adult Program"';
+    else if (classType === 'family') classCondition = 'program = "Family Classes"';
+    
+    let query = 'SELECT id, name, email, phone, beltLevel, joinDate, program FROM members WHERE role = "member"';
+    if (classCondition) query += ' AND ' + classCondition;
+    query += ' ORDER BY name';
+    
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Get all students (instructor view)
+app.get('/api/instructor/all-students', authenticateToken, requireInstructor, (req, res) => {
+    db.query('SELECT id, name, email, phone, beltLevel, program, joinDate FROM members WHERE role = "member" ORDER BY name', (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Mark attendance
+app.post('/api/instructor/attendance', authenticateToken, requireInstructor, (req, res) => {
+    const { studentId, classType, status, date } = req.body;
+    
+    const attendance = {
+        memberId: studentId,
+        classDate: date || moment().format('YYYY-MM-DD'),
+        classType: classType,
+        status: status || 'present'
+    };
+    
+    db.query('INSERT INTO attendance SET ? ON DUPLICATE KEY UPDATE status = ?, notes = ?', 
+        [attendance, status, attendance.notes], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Failed to mark attendance' });
+        res.json({ success: true, message: 'Attendance recorded' });
+    });
+});
+
+// Get attendance for a student
+app.get('/api/instructor/attendance/:studentId', authenticateToken, requireInstructor, (req, res) => {
+    db.query('SELECT * FROM attendance WHERE memberId = ? ORDER BY classDate DESC LIMIT 30', [req.params.studentId], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Get attendance by class and date
+app.get('/api/instructor/attendance-by-class', authenticateToken, requireInstructor, (req, res) => {
+    const { classType, date } = req.query;
+    const classDate = date || moment().format('YYYY-MM-DD');
+    
+    db.query(`
+        SELECT a.*, m.name, m.beltLevel 
+        FROM attendance a 
+        JOIN members m ON a.memberId = m.id 
+        WHERE a.classType = ? AND a.classDate = ?
+    `, [classType, classDate], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Update student belt
+app.put('/api/instructor/student/:id/belt', authenticateToken, requireInstructor, (req, res) => {
+    const { beltLevel } = req.body;
+    db.query('UPDATE members SET beltLevel = ? WHERE id = ?', [beltLevel, req.params.id], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Update failed' });
+        
+        // Also update belt_progress
+        db.query('UPDATE belt_progress SET currentBelt = ? WHERE memberId = ?', [beltLevel, req.params.id], (err2) => {
+            if (err2) console.error('Error updating belt progress:', err2);
+        });
+        
+        res.json({ success: true, message: 'Belt updated successfully' });
+    });
+});
+
+// Add instructor note for student
+app.post('/api/instructor/student/:id/note', authenticateToken, requireInstructor, (req, res) => {
+    const { note } = req.body;
+    db.query('UPDATE belt_progress SET instructorNotes = ? WHERE memberId = ?', [note, req.params.id], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Failed to add note' });
+        res.json({ success: true, message: 'Note added' });
+    });
+});
+
+// Get class schedule for instructor
+app.get('/api/instructor/schedule', authenticateToken, requireInstructor, (req, res) => {
+    const schedule = [
+        { day: 'Monday', time: '4:00 PM', class: 'Little Tigers', duration: '45 min' },
+        { day: 'Monday', time: '5:00 PM', class: 'Junior Program', duration: '60 min' },
+        { day: 'Tuesday', time: '4:00 PM', class: 'Little Tigers', duration: '45 min' },
+        { day: 'Tuesday', time: '5:00 PM', class: 'Junior Program', duration: '60 min' },
+        { day: 'Wednesday', time: '4:00 PM', class: 'Little Tigers', duration: '45 min' },
+        { day: 'Wednesday', time: '5:00 PM', class: 'Junior Program', duration: '60 min' },
+        { day: 'Wednesday', time: '6:00 PM', class: 'Teen/Adult', duration: '60 min' },
+        { day: 'Thursday', time: '4:00 PM', class: 'Little Tigers', duration: '45 min' },
+        { day: 'Thursday', time: '5:00 PM', class: 'Junior Program', duration: '60 min' },
+        { day: 'Friday', time: '4:00 PM', class: 'Family Class', duration: '45 min' },
+        { day: 'Friday', time: '5:00 PM', class: 'Teen/Adult', duration: '60 min' },
+        { day: 'Saturday', time: '10:00 AM', class: 'Little Tigers', duration: '45 min' },
+        { day: 'Saturday', time: '11:00 AM', class: 'Junior Program', duration: '60 min' }
+    ];
+    res.json(schedule);
+});
+
+// ============================================
+// PAYMENT ROUTES
+// ============================================
+
 app.post('/api/payments/jazzcash/initiate', authenticateToken, (req, res) => {
     try {
         const { amount, forMonth } = req.body;
         const memberId = req.user.id;
-        
-        // Generate order ID
         const orderId = `TKD${Date.now()}${Math.floor(Math.random() * 1000)}`;
         
-        // Create pending payment record
         const payment = {
             memberId,
             amount,
@@ -562,11 +731,8 @@ app.post('/api/payments/jazzcash/initiate', authenticateToken, (req, res) => {
         };
         
         db.query('INSERT INTO payments SET ?', payment, (err, result) => {
-            if (err) {
-                return res.status(500).json({ success: false, message: 'Payment creation failed' });
-            }
+            if (err) return res.status(500).json({ success: false, message: 'Payment creation failed' });
             
-            // Return payment instructions
             res.json({
                 success: true,
                 paymentId: result.insertId,
@@ -593,16 +759,12 @@ app.post('/api/payments/jazzcash/initiate', authenticateToken, (req, res) => {
     }
 });
 
-// ---------- EASYPAISA PAYMENT INITIATION ----------
 app.post('/api/payments/easypaisa/initiate', authenticateToken, (req, res) => {
     try {
         const { amount, forMonth } = req.body;
         const memberId = req.user.id;
-        
-        // Generate order ID
         const orderId = `EP${Date.now()}${Math.floor(Math.random() * 1000)}`;
         
-        // Create pending payment record
         const payment = {
             memberId,
             amount,
@@ -613,11 +775,8 @@ app.post('/api/payments/easypaisa/initiate', authenticateToken, (req, res) => {
         };
         
         db.query('INSERT INTO payments SET ?', payment, (err, result) => {
-            if (err) {
-                return res.status(500).json({ success: false, message: 'Payment creation failed' });
-            }
+            if (err) return res.status(500).json({ success: false, message: 'Payment creation failed' });
             
-            // Return payment instructions
             res.json({
                 success: true,
                 paymentId: result.insertId,
@@ -644,103 +803,68 @@ app.post('/api/payments/easypaisa/initiate', authenticateToken, (req, res) => {
     }
 });
 
-// ---------- CONFIRM MANUAL PAYMENT ----------
 app.post('/api/payments/confirm', authenticateToken, (req, res) => {
     try {
         const { paymentId, transactionId } = req.body;
         
-        db.query(
-            'UPDATE payments SET status = ?, jazzcashTransactionId = ?, paymentDate = NOW() WHERE id = ? AND memberId = ?',
-            ['completed', transactionId, paymentId, req.user.id],
-            (err, result) => {
-                if (err) {
-                    return res.status(500).json({ success: false, message: 'Confirmation failed' });
+        db.query('UPDATE payments SET status = ?, jazzcashTransactionId = ?, paymentDate = NOW() WHERE id = ? AND memberId = ?',
+            ['completed', transactionId, paymentId, req.user.id], (err, result) => {
+            if (err) return res.status(500).json({ success: false, message: 'Confirmation failed' });
+            if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Payment not found' });
+            
+            db.query('SELECT email, name FROM members WHERE id = ?', [req.user.id], (err, userResults) => {
+                if (!err && userResults.length > 0) {
+                    const user = userResults[0];
+                    const emailHtml = `
+                        <div style="font-family: Arial, sans-serif;">
+                            <h2 style="color: #F97316;">Payment Successful!</h2>
+                            <p>Dear ${user.name},</p>
+                            <p>Your payment has been confirmed successfully.</p>
+                            <p><strong>Transaction ID:</strong> ${transactionId}</p>
+                            <p>Thank you for your continued support!</p>
+                        </div>
+                    `;
+                    sendEmail(user.email, 'Payment Confirmed - Paths Tiger Academy', emailHtml).catch(console.error);
                 }
-                
-                if (result.affectedRows === 0) {
-                    return res.status(404).json({ success: false, message: 'Payment not found' });
-                }
-                
-                // Get member email for notification
-                db.query('SELECT email, name FROM members WHERE id = ?', [req.user.id], (err, userResults) => {
-                    if (!err && userResults.length > 0) {
-                        const user = userResults[0];
-                        
-                        // Send confirmation email
-                        const emailHtml = `
-                            <div style="font-family: Arial, sans-serif;">
-                                <h2 style="color: #F97316;">Payment Successful!</h2>
-                                <p>Dear ${user.name},</p>
-                                <p>Your payment has been confirmed successfully.</p>
-                                <p><strong>Transaction ID:</strong> ${transactionId}</p>
-                                <p>Thank you for your continued support!</p>
-                            </div>
-                        `;
-                        
-                        sendEmail(user.email, 'Payment Confirmed - Paths Tiger Academy', emailHtml).catch(console.error);
-                    }
-                });
-                
-                res.json({
-                    success: true,
-                    message: 'Payment confirmed successfully'
-                });
-            }
-        );
+            });
+            
+            res.json({ success: true, message: 'Payment confirmed successfully' });
+        });
     } catch (error) {
         console.error('Payment confirmation error:', error);
         res.status(500).json({ success: false, message: 'Confirmation failed' });
     }
 });
 
-// ---------- GET PAYMENT HISTORY ----------
 app.get('/api/payments/history', authenticateToken, (req, res) => {
-    db.query(
-        'SELECT * FROM payments WHERE memberId = ? ORDER BY createdAt DESC',
-        [req.user.id],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ success: false, message: 'Failed to fetch payments' });
-            }
-            
-            res.json({
-                success: true,
-                payments: results
-            });
-        }
-    );
+    db.query('SELECT * FROM payments WHERE memberId = ? ORDER BY createdAt DESC', [req.user.id], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Failed to fetch payments' });
+        res.json({ success: true, payments: results });
+    });
 });
 
-// ---------- GET BELT PROGRESS ----------
 app.get('/api/member/belt-progress', authenticateToken, (req, res) => {
-    db.query(
-        'SELECT * FROM belt_progress WHERE memberId = ?',
-        [req.user.id],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ success: false, message: 'Failed to fetch belt progress' });
-            }
-            
-            const beltRequirements = {
-                white: ['Basic Stances', 'Front Kick', 'Blocking', 'Korean Counting', 'Basic Form', 'Class Etiquette'],
-                yellow: ['Roundhouse Kick', 'Side Kick', 'Form 1', 'One-step Sparring', 'Board Breaking', 'Korean Commands'],
-                green: ['Back Kick', 'Hook Kick', 'Form 2', 'Free Sparring', 'Self-Defense', 'Terminology'],
-                blue: ['Jump Kicks', 'Form 3', 'Form 4', 'Sparring Combos', 'Breaking 2 boards', 'Teaching basics'],
-                red: ['Form 5', 'Form 6', 'Advanced Sparring', 'Multiple Breaks', 'Demo Team Prep', 'Leadership'],
-                black: ['All Forms 1-8', 'Black Belt Form', 'Board Breaking', 'Sparring Tournament', 'Essay/Written', 'Community Service']
-            };
-            
-            res.json({
-                success: true,
-                currentBelt: req.user.beltLevel,
-                beltProgress: results[0] || {},
-                beltRequirements
-            });
-        }
-    );
+    db.query('SELECT * FROM belt_progress WHERE memberId = ?', [req.user.id], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Failed to fetch belt progress' });
+        
+        const beltRequirements = {
+            white: ['Basic Stances', 'Front Kick', 'Blocking', 'Korean Counting', 'Basic Form', 'Class Etiquette'],
+            yellow: ['Roundhouse Kick', 'Side Kick', 'Form 1', 'One-step Sparring', 'Board Breaking', 'Korean Commands'],
+            green: ['Back Kick', 'Hook Kick', 'Form 2', 'Free Sparring', 'Self-Defense', 'Terminology'],
+            blue: ['Jump Kicks', 'Form 3', 'Form 4', 'Sparring Combos', 'Breaking 2 boards', 'Teaching basics'],
+            red: ['Form 5', 'Form 6', 'Advanced Sparring', 'Multiple Breaks', 'Demo Team Prep', 'Leadership'],
+            black: ['All Forms 1-8', 'Black Belt Form', 'Board Breaking', 'Sparring Tournament', 'Essay/Written', 'Community Service']
+        };
+        
+        res.json({
+            success: true,
+            currentBelt: req.user.beltLevel,
+            beltProgress: results[0] || {},
+            beltRequirements
+        });
+    });
 });
 
-// ---------- GET ATTENDANCE ----------
 app.get('/api/member/attendance', authenticateToken, (req, res) => {
     const { month, year } = req.query;
     let query = 'SELECT * FROM attendance WHERE memberId = ?';
@@ -750,22 +874,18 @@ app.get('/api/member/attendance', authenticateToken, (req, res) => {
         query += ' AND YEAR(classDate) = ? AND MONTH(classDate) = ?';
         params.push(year, month);
     }
-    
     query += ' ORDER BY classDate DESC';
     
     db.query(query, params, (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, message: 'Failed to fetch attendance' });
-        }
-        
-        res.json({
-            success: true,
-            attendance: results
-        });
+        if (err) return res.status(500).json({ success: false, message: 'Failed to fetch attendance' });
+        res.json({ success: true, attendance: results });
     });
 });
 
-// ---------- CREATE ADMIN USER (Run once) ----------
+// ============================================
+// SETUP ROUTES
+// ============================================
+
 app.get('/api/setup-admin', async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash('Admin@123', 10);
@@ -794,6 +914,34 @@ app.get('/api/setup-admin', async (req, res) => {
     }
 });
 
+app.get('/api/setup-instructor', async (req, res) => {
+    try {
+        const hashedPassword = await bcrypt.hash('Instructor@123', 10);
+        
+        const instructor = {
+            name: 'Master Lee',
+            email: 'instructor@pathstiger.com',
+            password: hashedPassword,
+            phone: '0317-4084614',
+            role: 'instructor',
+            joinDate: moment().format('YYYY-MM-DD'),
+            isActive: true
+        };
+        
+        db.query('INSERT INTO members SET ?', instructor, (err) => {
+            if (err && err.code === 'ER_DUP_ENTRY') {
+                res.json({ message: 'Instructor user already exists' });
+            } else if (err) {
+                res.status(500).json({ error: err.message });
+            } else {
+                res.json({ message: 'Instructor user created successfully' });
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ============================================
 // START SERVER
 // ============================================
@@ -802,5 +950,6 @@ app.listen(PORT, () => {
     console.log(`📝 API available at http://localhost:${PORT}/api`);
     console.log(`✅ Health check: http://localhost:${PORT}/api/health`);
     console.log(`🌐 Your website: http://localhost:${PORT}/`);
-    console.log(`📁 Place HTML files in the "public" folder`);
+    console.log(`👑 Admin setup: http://localhost:${PORT}/api/setup-admin`);
+    console.log(`👨‍🏫 Instructor setup: http://localhost:${PORT}/api/setup-instructor`);
 });

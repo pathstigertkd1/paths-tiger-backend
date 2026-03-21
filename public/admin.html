@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Admin Dashboard - Paths Tiger Taekwondo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #F97316;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .sidebar-link.active {
+            background-color: #F97316;
+            color: white;
+        }
+        .sidebar-link:hover {
+            background-color: #F97316;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        // Check if user is admin
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+        
+        // Check if user has admin role
+        if (user.role !== 'admin') {
+            alert('Access denied. Admin privileges required.');
+            window.location.href = 'member-area.html';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('adminName').textContent = user.name || 'Admin';
+            loadDashboard();
+            loadMembers();
+            loadPayments();
+            loadContacts();
+        });
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+        
+        // Navigation between sections
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(section + '-section').classList.remove('hidden');
+            
+            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Load data when switching sections
+            if (section === 'members') loadMembers();
+            if (section === 'payments') loadPayments();
+            if (section === 'contacts') loadContacts();
+        }
+        
+        // Load dashboard stats
+        async function loadDashboard() {
+            try {
+                // Get total members
+                const membersRes = await fetch(`${API_BASE_URL}/admin/members`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const members = await membersRes.json();
+                document.getElementById('totalMembers').textContent = members.length || 0;
+                
+                // Get total payments
+                const paymentsRes = await fetch(`${API_BASE_URL}/admin/payments`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const payments = await paymentsRes.json();
+                document.getElementById('totalRevenue').textContent = 'Rs. ' + (payments.reduce((sum, p) => sum + parseFloat(p.amount), 0) || 0);
+                document.getElementById('pendingPayments').textContent = payments.filter(p => p.status === 'pending').length || 0;
+                
+                // Get unread contacts
+                const contactsRes = await fetch(`${API_BASE_URL}/admin/contacts`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const contacts = await contactsRes.json();
+                document.getElementById('unreadMessages').textContent = contacts.filter(c => c.status === 'new').length || 0;
+                
+            } catch (error) {
+                console.error('Dashboard error:', error);
+            }
+        }
+        
+        // Load members list
+        async function loadMembers() {
+            const container = document.getElementById('membersTable');
+            container.innerHTML = '<tr><td colspan="7" class="text-center py-4">Loading...</td></tr>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/members`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const members = await response.json();
+                
+                if (members.length === 0) {
+                    container.innerHTML = '<tr><td colspan="7" class="text-center py-4">No members found</td></tr>';
+                    return;
+                }
+                
+                container.innerHTML = members.map(m => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">${m.id}</td>
+                        <td class="p-3 font-medium">${m.name}</td>
+                        <td class="p-3">${m.email}</td>
+                        <td class="p-3">${m.phone || '-'}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 rounded-full text-xs ${getBeltColor(m.beltLevel)}">${m.beltLevel || 'white'}</span>
+                        </td>
+                        <td class="p-3">${m.joinDate ? new Date(m.joinDate).toLocaleDateString() : '-'}</td>
+                        <td class="p-3">
+                            <button onclick="viewMember(${m.id})" class="text-blue-600 hover:underline mr-2">View</button>
+                            <button onclick="deleteMember(${m.id})" class="text-red-600 hover:underline">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading members:', error);
+                container.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-500">Error loading members</td></tr>';
+            }
+        }
+        
+        // Load payments list
+        async function loadPayments() {
+            const container = document.getElementById('paymentsTable');
+            container.innerHTML = '<tr><td colspan="7" class="text-center py-4">Loading...</td></tr>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/payments`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const payments = await response.json();
+                
+                if (payments.length === 0) {
+                    container.innerHTML = '<tr><td colspan="7" class="text-center py-4">No payments found</td></tr>';
+                    return;
+                }
+                
+                container.innerHTML = payments.map(p => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">${p.id}</td>
+                        <td class="p-3">${p.memberId}</td>
+                        <td class="p-3 font-medium">Rs. ${p.amount}</td>
+                        <td class="p-3">${p.paymentMethod || '-'}</td>
+                        <td class="p-3">${p.transactionId || '-'}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 rounded-full text-xs ${getPaymentStatusColor(p.status)}">${p.status}</span>
+                        </td>
+                        <td class="p-3">${p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : '-'}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading payments:', error);
+                container.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-500">Error loading payments</td></tr>';
+            }
+        }
+        
+        // Load contacts list
+        async function loadContacts() {
+            const container = document.getElementById('contactsTable');
+            container.innerHTML = '<tr><td colspan="6" class="text-center py-4">Loading...</td></tr>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/contacts`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const contacts = await response.json();
+                
+                if (contacts.length === 0) {
+                    container.innerHTML = '<tr><td colspan="6" class="text-center py-4">No messages found</td></tr>';
+                    return;
+                }
+                
+                container.innerHTML = contacts.map(c => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">${c.id}</td>
+                        <td class="p-3 font-medium">${c.name}</td>
+                        <td class="p-3">${c.email}</td>
+                        <td class="p-3">${c.phone || '-'}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 rounded-full text-xs ${getContactStatusColor(c.status)}">${c.status}</span>
+                        </td>
+                        <td class="p-3">
+                            <button onclick="viewMessage(${c.id})" class="text-blue-600 hover:underline">View</button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading contacts:', error);
+                container.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-500">Error loading messages</td></tr>';
+            }
+        }
+        
+        // View member details
+        async function viewMember(memberId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/members/${memberId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const member = await response.json();
+                
+                alert(`Member Details:\n\nName: ${member.name}\nEmail: ${member.email}\nPhone: ${member.phone}\nBelt: ${member.beltLevel}\nJoin Date: ${member.joinDate}`);
+                
+            } catch (error) {
+                alert('Error loading member details');
+            }
+        }
+        
+        // Delete member
+        async function deleteMember(memberId) {
+            if (confirm('Are you sure you want to delete this member? This action cannot be undone.')) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/admin/members/${memberId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    
+                    if (response.ok) {
+                        alert('Member deleted successfully');
+                        loadMembers();
+                    } else {
+                        alert('Error deleting member');
+                    }
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            }
+        }
+        
+        // View message
+        function viewMessage(messageId) {
+            window.location.href = `message-detail.html?id=${messageId}`;
+        }
+        
+        // Helper functions for colors
+        function getBeltColor(belt) {
+            const colors = {
+                white: 'bg-gray-200 text-gray-800',
+                yellow: 'bg-yellow-200 text-yellow-800',
+                green: 'bg-green-200 text-green-800',
+                blue: 'bg-blue-200 text-blue-800',
+                red: 'bg-red-200 text-red-800',
+                black: 'bg-gray-800 text-white'
+            };
+            return colors[belt] || 'bg-gray-200 text-gray-800';
+        }
+        
+        function getPaymentStatusColor(status) {
+            const colors = {
+                pending: 'bg-yellow-200 text-yellow-800',
+                completed: 'bg-green-200 text-green-800',
+                failed: 'bg-red-200 text-red-800',
+                refunded: 'bg-gray-200 text-gray-800'
+            };
+            return colors[status] || 'bg-gray-200 text-gray-800';
+        }
+        
+        function getContactStatusColor(status) {
+            const colors = {
+                new: 'bg-red-200 text-red-800',
+                read: 'bg-yellow-200 text-yellow-800',
+                replied: 'bg-green-200 text-green-800'
+            };
+            return colors[status] || 'bg-gray-200 text-gray-800';
+        }
+    </script>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-900 text-white flex flex-col">
+            <div class="p-6 border-b border-gray-800">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl">🦁</span>
+                    <span class="font-bold text-xl">Paths Tiger</span>
+                </div>
+                <p class="text-sm text-gray-400 mt-2">Admin Panel</p>
+            </div>
+            
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" onclick="showSection('dashboard'); return false;" class="sidebar-link active block px-4 py-3 rounded-lg transition" data-section="dashboard">
+                            📊 Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showSection('members'); return false;" class="sidebar-link block px-4 py-3 rounded-lg transition">
+                            👥 Members
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showSection('payments'); return false;" class="sidebar-link block px-4 py-3 rounded-lg transition">
+                            💳 Payments
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showSection('contacts'); return false;" class="sidebar-link block px-4 py-3 rounded-lg transition">
+                            📧 Messages
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="showSection('settings'); return false;" class="sidebar-link block px-4 py-3 rounded-lg transition">
+                            ⚙️ Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="p-4 border-t border-gray-800">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center">
+                        <span class="text-xl">👑</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold" id="adminName">Admin</p>
+                        <p class="text-xs text-gray-400">Administrator</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section p-8">
+                <h1 class="text-3xl font-bold mb-8">Dashboard</h1>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Members</p>
+                                <p class="text-3xl font-bold text-orange-600" id="totalMembers">0</p>
+                            </div>
+                            <div class="text-4xl">👥</div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Revenue</p>
+                                <p class="text-3xl font-bold text-green-600" id="totalRevenue">Rs. 0</p>
+                            </div>
+                            <div class="text-4xl">💰</div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Pending Payments</p>
+                                <p class="text-3xl font-bold text-yellow-600" id="pendingPayments">0</p>
+                            </div>
+                            <div class="text-4xl">⏳</div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Unread Messages</p>
+                                <p class="text-3xl font-bold text-red-600" id="unreadMessages">0</p>
+                            </div>
+                            <div class="text-4xl">📧</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
+                    <p class="text-gray-500">Recent members and payments will appear here.</p>
+                </div>
+            </div>
+            
+            <!-- Members Section -->
+            <div id="members-section" class="section hidden p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold">Members Management</h1>
+                    <button onclick="loadMembers()" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">ID</th>
+                                <th class="p-3 text-left">Name</th>
+                                <th class="p-3 text-left">Email</th>
+                                <th class="p-3 text-left">Phone</th>
+                                <th class="p-3 text-left">Belt</th>
+                                <th class="p-3 text-left">Join Date</th>
+                                <th class="p-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersTable">
+                            <tr><td colspan="7" class="text-center py-4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Payments Section -->
+            <div id="payments-section" class="section hidden p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold">Payment History</h1>
+                    <button onclick="loadPayments()" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">ID</th>
+                                <th class="p-3 text-left">Member ID</th>
+                                <th class="p-3 text-left">Amount</th>
+                                <th class="p-3 text-left">Method</th>
+                                <th class="p-3 text-left">Transaction ID</th>
+                                <th class="p-3 text-left">Status</th>
+                                <th class="p-3 text-left">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTable">
+                            <tr><td colspan="7" class="text-center py-4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Contacts Section -->
+            <div id="contacts-section" class="section hidden p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold">Contact Messages</h1>
+                    <button onclick="loadContacts()" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">ID</th>
+                                <th class="p-3 text-left">Name</th>
+                                <th class="p-3 text-left">Email</th>
+                                <th class="p-3 text-left">Phone</th>
+                                <th class="p-3 text-left">Status</th>
+                                <th class="p-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactsTable">
+                            <tr><td colspan="6" class="text-center py-4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Settings Section -->
+            <div id="settings-section" class="section hidden p-8">
+                <h1 class="text-3xl font-bold mb-8">Settings</h1>
+                
+                <div class="bg-white rounded-2xl shadow-lg p-6 max-w-2xl">
+                    <h2 class="text-xl font-bold mb-4">Academy Information</h2>
+                    <form id="settingsForm">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Academy Name</label>
+                            <input type="text" value="Paths Tiger Taekwondo Academy" class="w-full p-3 border rounded-lg">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Address</label>
+                            <input type="text" value="Hospital Road, Manga Mandi Lahore" class="w-full p-3 border rounded-lg">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Phone</label>
+                            <input type="text" value="0317-4084613" class="w-full p-3 border rounded-lg">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Email</label>
+                            <input type="email" value="pathstiger1@gmail.com" class="w-full p-3 border rounded-lg">
+                        </div>
+                        <button type="submit" class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700">Save Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Instructor Login - Paths Tiger</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <nav class="bg-orange-500 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl">🦁</span>
+                    <span class="font-bold text-xl text-white">Paths Tiger Taekwondo Academy</span>
+                </div>
+                <div class="hidden md:block">
+                    <ul class="flex space-x-6">
+                        <li><a href="index.html" class="text-white hover:bg-amber-500 rounded px-2 py-2">Home</a></li>
+                        <li><a href="about.html" class="text-white hover:bg-amber-500 rounded px-2 py-2">About</a></li>
+                        <li><a href="programs.html" class="text-white hover:bg-amber-500 rounded px-2 py-2">Programs</a></li>
+                        <li><a href="contact.html" class="text-white hover:bg-amber-500 rounded px-2 py-2">Contact</a></li>
+                        <li><a href="login.html" class="text-white hover:bg-amber-500 rounded px-2 py-2">Member Login</a></li>
+                    </ul>
+                </div>
+                <a href="instructor-login.html" class="text-white px-4 py-2 hover:bg-purple-950 bg-amber-950 rounded-2xl">Instructor Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="min-h-screen flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <span class="text-6xl">👨‍🏫</span>
+                <h2 class="text-3xl font-bold mt-4">Instructor Login</h2>
+                <p class="text-gray-600">Access your teaching dashboard</p>
+            </div>
+
+            <div id="errorMessage" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm"></div>
+
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Email Address</label>
+                    <input type="email" id="email" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-600" placeholder="instructor@pathstiger.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Password</label>
+                    <input type="password" id="password" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-600" placeholder="••••••••">
+                </div>
+                <button type="submit" id="loginBtn" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700 transition flex items-center justify-center">
+                    <span id="btnText">Login as Instructor</span>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">Not an instructor? <a href="login.html" class="text-orange-600 hover:underline">Member Login</a></p>
+            </div>
+
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <p class="text-xs text-gray-500 font-semibold mb-2">Demo Instructor Credentials:</p>
+                <div class="text-xs">
+                    <p>Email: <span class="font-medium">instructor@pathstiger.com</span></p>
+                    <p>Password: <span class="font-medium">Instructor@123</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div><span class="text-2xl font-bold">🐯 Paths Tiger</span><p class="text-sm text-gray-400">Taekwondo Academy</p></div>
+                <div class="text-sm text-gray-400">© 2026 All Rights Reserved</div>
+                <div class="flex space-x-4"><a href="#" class="text-gray-400 hover:text-white">📘</a><a href="#" class="text-gray-400 hover:text-white">📷</a><a href="#" class="text-gray-400 hover:text-white">▶️</a></div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('btnText');
+            const errorMsg = document.getElementById('errorMessage');
+            
+            errorMsg.classList.add('hidden');
+            loginBtn.disabled = true;
+            btnText.innerHTML = '<span class="loading"></span> Logging in...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                
+                if (data.success && data.user.role === 'instructor') {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = 'instructor-dashboard.html';
+                } else {
+                    errorMsg.textContent = 'Invalid instructor credentials. Please check your email and password.';
+                    errorMsg.classList.remove('hidden');
+                    loginBtn.disabled = false;
+                    btnText.textContent = 'Login as Instructor';
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Connection error. Make sure the server is running.';
+                errorMsg.classList.remove('hidden');
+                loginBtn.disabled = false;
+                btnText.textContent = 'Login as Instructor';
+            }
+        });
+    </script>
+</body>
+</html>
