@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Payment - Paths Tiger Taekwondo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Navigation Bar (Same as other pages) -->
+    <nav class="bg-orange-500 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl">🦁</span>
+                    <span class="font-bold text-xl text-white">Paths Tiger Taekwondo Academy</span>
+                </div>
+                <div class="hidden md:block">
+                    <ul class="flex space-x-6">
+                        <li><a href="index.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Home</a></li>
+                        <li><a href="about.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">About</a></li>
+                        <li><a href="programs.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Programs</a></li>
+                        <li><a href="contact.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Contact Us</a></li>
+                        <li><a href="gallery.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Gallery</a></li>
+                        <li><a href="schedule.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Schedule</a></li>
+                    </ul>
+                </div>
+                <a href="login.html" class="text-white px-4 py-2 hover:bg-purple-950 transition bg-amber-950 rounded-2xl">Member Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-orange-500 text-white py-12">
+        <div class="max-w-7xl mx-auto text-center px-4">
+            <h1 class="text-4xl font-black mb-2">Make <span class="text-black">Payment</span></h1>
+            <p class="text-lg">Secure payment options for Pakistan</p>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        
+        <!-- Payment Summary Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">Payment Summary</h2>
+            <div class="bg-orange-50 p-4 rounded-xl">
+                <div class="flex justify-between mb-2">
+                    <span>Membership Type:</span>
+                    <span class="font-semibold">Basic Monthly</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span>Member Name:</span>
+                    <span class="font-semibold">Ali Khan</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span>Belt Level:</span>
+                    <span class="font-semibold">White Belt</span>
+                </div>
+                <div class="flex justify-between pt-2 border-t border-orange-200 mt-2">
+                    <span class="font-bold">Total Amount:</span>
+                    <span class="font-bold text-2xl text-orange-600">Rs. 7,900</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">*All amounts are in Pakistani Rupees</p>
+            </div>
+        </div>
+
+        <!-- Payment Methods Tabs -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            
+            <!-- Tab Headers -->
+            <div class="flex border-b">
+                <button onclick="showTab('card')" id="tab-card" class="flex-1 py-4 px-4 text-center font-semibold bg-orange-600 text-white">
+                    💳 Credit/Debit Card
+                </button>
+                <button onclick="showTab('jazzcash')" id="tab-jazzcash" class="flex-1 py-4 px-4 text-center font-semibold hover:bg-gray-50">
+                    📱 JazzCash
+                </button>
+                <button onclick="showTab('easypaisa')" id="tab-easypaisa" class="flex-1 py-4 px-4 text-center font-semibold hover:bg-gray-50">
+                    💚 Easypaisa
+                </button>
+                <button onclick="showTab('bank')" id="tab-bank" class="flex-1 py-4 px-4 text-center font-semibold hover:bg-gray-50">
+                    🏦 Bank Transfer
+                </button>
+            </div>
+
+            <!-- JavaScript for Tabs -->
+            <script>
+                function showTab(tabName) {
+                    // Hide all tabs
+                    document.getElementById('card-tab').style.display = 'none';
+                    document.getElementById('jazzcash-tab').style.display = 'none';
+                    document.getElementById('easypaisa-tab').style.display = 'none';
+                    document.getElementById('bank-tab').style.display = 'none';
+                    
+                    // Reset tab button styles
+                    document.getElementById('tab-card').className = 'flex-1 py-4 px-4 text-center font-semibold hover:bg-gray-50';
+                    document.getElementById('tab-jazzcash').className = 'flex-1 py-4 px-4 text-center font-semibold hover:bg-gray-50';
+                    document.getElementById('tab-easypaisa').className = 'flex-1 py-4 px-4 text-center font-semibold hover:bg-gray-50';
+                    document.getElementById('tab-bank').className = 'flex-1 py-4 px-4 text-center font-semibold hover:bg-gray-50';
+                    
+                    // Show selected tab and highlight button
+                    document.getElementById(tabName + '-tab').style.display = 'block';
+                    document.getElementById('tab-' + tabName).className = 'flex-1 py-4 px-4 text-center font-semibold bg-orange-600 text-white';
+                }
+            </script>
+
+            <!-- Tab Contents -->
+            <div class="p-6">
+                
+                <!-- 1. Credit/Debit Card Tab -->
+                <div id="card-tab" class="tab-content">
+                    <h3 class="text-lg font-bold mb-4">Pay with Credit/Debit Card</h3>
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Card Number</label>
+                            <input type="text" placeholder="1234 5678 9012 3456" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Expiry Date</label>
+                                <input type="text" placeholder="MM/YY" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">CVV</label>
+                                <input type="text" placeholder="123" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Cardholder Name</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
+                        </div>
+
+                        <button type="submit" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700 transition">
+                            Pay Rs. 7,900 Now
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 2. JazzCash Tab -->
+                <div id="jazzcash-tab" class="tab-content" style="display: none;">
+                    <div class="text-center mb-6">
+                        <span class="text-6xl">📱</span>
+                        <h3 class="text-2xl font-bold mt-2">JazzCash</h3>
+                        <p class="text-gray-600">Pay using your JazzCash mobile account</p>
+                    </div>
+
+                    <div class="bg-green-50 p-6 rounded-xl mb-6">
+                        <h4 class="font-bold mb-3">JazzCash Account Details:</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>JazzCash Account:</span>
+                                <span class="font-bold">0317-4084613</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Account Title:</span>
+                                <span class="font-bold">Paths Tiger Taekwondo</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Amount:</span>
+                                <span class="font-bold text-orange-600">Rs. 7,900</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="font-semibold mb-2">📱 How to pay via JazzCash:</p>
+                            <ol class="list-decimal list-inside space-y-1 text-sm">
+                                <li>Open your JazzCash app</li>
+                                <li>Select "Send Money" or "Mobile Account"</li>
+                                <li>Enter mobile number: <span class="font-bold">0317-4084613</span></li>
+                                <li>Enter amount: <span class="font-bold">Rs. 7,900</span></li>
+                                <li>Add reference: "Membership Fee + Your Name"</li>
+                                <li>Enter your PIN to confirm</li>
+                            </ol>
+                        </div>
+
+                        <!-- Transaction Confirmation Form -->
+                        <form class="space-y-4 mt-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">JazzCash Transaction ID *</label>
+                                <input type="text" placeholder="Enter transaction ID from your app" required class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Your Mobile Number *</label>
+                                <input type="tel" placeholder="03XX-XXXXXXX" required class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition">
+                                Confirm Payment
+                            </button>
+                        </form>
+
+                        <p class="text-xs text-gray-500 text-center mt-2">
+                            We'll verify your transaction within 30 minutes
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 3. Easypaisa Tab -->
+                <div id="easypaisa-tab" class="tab-content" style="display: none;">
+                    <div class="text-center mb-6">
+                        <span class="text-6xl">💚</span>
+                        <h3 class="text-2xl font-bold mt-2">Easypaisa</h3>
+                        <p class="text-gray-600">Pay using Easypaisa mobile account or shop</p>
+                    </div>
+
+                    <div class="bg-green-50 p-6 rounded-xl mb-6">
+                        <h4 class="font-bold mb-3">Easypaisa Account Details:</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Easypaisa Account:</span>
+                                <span class="font-bold">0317-4084613</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Account Title:</span>
+                                <span class="font-bold">Paths Tiger Taekwondo</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Amount:</span>
+                                <span class="font-bold text-orange-600">Rs. 7,900</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-6">
+                        <!-- Mobile App Method -->
+                        <div class="border rounded-lg p-4">
+                            <span class="text-2xl mb-2 block">📱</span>
+                            <h4 class="font-bold mb-2">Via Easypaisa App</h4>
+                            <ol class="list-decimal list-inside text-sm space-y-1">
+                                <li>Open Easypaisa app</li>
+                                <li>Select "Send Money"</li>
+                                <li>Enter mobile number: 0317-4084613</li>
+                                <li>Enter amount: Rs. 7,900</li>
+                                <li>Add your name in description</li>
+                            </ol>
+                        </div>
+
+                        <!-- Shop Method -->
+                        <div class="border rounded-lg p-4">
+                            <span class="text-2xl mb-2 block">🏪</span>
+                            <h4 class="font-bold mb-2">At Easypaisa Shop</h4>
+                            <ol class="list-decimal list-inside text-sm space-y-1">
+                                <li>Visit any Easypaisa shop</li>
+                                <li>Provide mobile number: 0317-4084613</li>
+                                <li>Pay cash: Rs. 7,900</li>
+                                <li>Keep the receipt</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Confirmation Form -->
+                    <form class="space-y-4 mt-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Easypaisa Transaction ID *</label>
+                            <input type="text" placeholder="Enter transaction ID" required class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Your Mobile Number</label>
+                                <input type="tel" placeholder="03XX-XXXXXXX" class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Payment Method</label>
+                                <select class="w-full p-3 border border-gray-300 rounded-lg">
+                                    <option>Easypaisa App</option>
+                                    <option>Easypaisa Shop</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition">
+                            Submit Payment Details
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 4. Bank Transfer Tab -->
+                <div id="bank-tab" class="tab-content" style="display: none;">
+                    <div class="text-center mb-6">
+                        <span class="text-6xl">🏦</span>
+                        <h3 class="text-2xl font-bold mt-2">Bank Transfer (IBFT)</h3>
+                        <p class="text-gray-600">Direct transfer from your bank account</p>
+                    </div>
+
+                    <div class="bg-blue-50 p-6 rounded-xl mb-6">
+                        <h4 class="font-bold mb-4">Bank Account Details:</h4>
+                        
+                        <!-- Bank 1: HBL -->
+                        <div class="mb-4 pb-4 border-b border-blue-200">
+                            <p class="font-bold text-lg mb-2">🏦 Habib Bank Limited (HBL)</p>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <span>Account Title:</span>
+                                <span class="font-bold">Paths Tiger Taekwondo</span>
+                                <span>Account Number:</span>
+                                <span class="font-bold">1234-5678-9012-3456</span>
+                                <span>IBAN:</span>
+                                <span class="font-bold">PK12HBLB1234567890123</span>
+                                <span>Branch Code:</span>
+                                <span class="font-bold">1234</span>
+                            </div>
+                        </div>
+
+                        <!-- Bank 2: Meezan -->
+                        <div class="mb-4 pb-4 border-b border-blue-200">
+                            <p class="font-bold text-lg mb-2">🏦 Meezan Bank (Islamic)</p>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <span>Account Title:</span>
+                                <span class="font-bold">Paths Tiger Taekwondo</span>
+                                <span>Account Number:</span>
+                                <span class="font-bold">5678-1234-9012-3456</span>
+                                <span>IBAN:</span>
+                                <span class="font-bold">PK36MEZN1234567890123</span>
+                            </div>
+                        </div>
+
+                        <!-- Bank 3: Allied Bank -->
+                        <div>
+                            <p class="font-bold text-lg mb-2">🏦 Allied Bank Limited (ABL)</p>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <span>Account Title:</span>
+                                <span class="font-bold">Paths Tiger Taekwondo</span>
+                                <span>Account Number:</span>
+                                <span class="font-bold">9012-3456-7890-1234</span>
+                                <span>IBAN:</span>
+                                <span class="font-bold">PK78ABL1234567890123</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <p class="font-semibold mb-2">📝 Instructions:</p>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>Use IBFT (Inter Bank Funds Transfer) for instant transfer</li>
+                                <li>Add your name and member ID in transfer description</li>
+                                <li>Transfer exact amount: <span class="font-bold">Rs. 7,900</span></li>
+                                <li>Send payment screenshot to <span class="font-bold">0317-4084613</span> on WhatsApp</li>
+                            </ul>
+                        </div>
+
+                        <!-- Bank Transfer Form -->
+                        <form class="space-y-4 mt-6">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Select Bank</label>
+                                    <select class="w-full p-3 border border-gray-300 rounded-lg">
+                                        <option>Habib Bank (HBL)</option>
+                                        <option>Meezan Bank</option>
+                                        <option>Allied Bank (ABL)</option>
+                                        <option>Other Bank</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Transfer Date</label>
+                                    <input type="date" class="w-full p-3 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Transaction Reference Number</label>
+                                <input type="text" placeholder="Enter bank reference/TRN" class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Upload Payment Screenshot (Optional)</label>
+                                <input type="file" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <p class="text-xs text-gray-500 mt-1">Or send screenshot via WhatsApp to 0317-4084613</p>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                                Submit Bank Transfer Details
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Badge -->
+        <div class="mt-6 text-center">
+            <div class="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full">
+                <span class="text-green-600">🔒</span>
+                <span class="text-sm text-gray-600">Secure Payment • Data Encrypted • Pakistan's Trusted Methods</span>
+            </div>
+        </div>
+
+        <!-- Accepted Payment Methods -->
+        <div class="mt-8 text-center">
+            <p class="text-sm text-gray-500 mb-2">Accepted Payment Methods in Pakistan:</p>
+            <div class="flex justify-center gap-4 text-2xl">
+                <span class="bg-white p-2 rounded shadow">💳</span>
+                <span class="bg-white p-2 rounded shadow">📱 JazzCash</span>
+                <span class="bg-white p-2 rounded shadow">💚 Easypaisa</span>
+                <span class="bg-white p-2 rounded shadow">🏦 HBL</span>
+                <span class="bg-white p-2 rounded shadow">🏦 Meezan</span>
+                <span class="bg-white p-2 rounded shadow">🏦 ABL</span>
+            </div>
+        </div>
+    </div>
+
+       <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <span class="text-2xl font-bold">🐯 Paths Tiger</span>
+                    <p class="text-sm text-gray-400 mt-1">Taekwondo Academy</p>
+                </div>
+                <div class="text-sm text-gray-400">
+                    © 2026 All Rights Reserved | My Paths Tiger Taekwondo Academy
+                </div>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📘</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📷</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">▶️</a>
+                </div>
+            </div>
+            <div class="text-center text-sm text-gray-400 mt-4 pt-4 border-t border-gray-800">
+                <p>🏪 Open: Monday-Friday 3PM-8PM | Saturday 9AM-1PM | Sunday Closed</p>
+                <p class="mt-2">📍 Hospital Road, Manga Mandi Lahore | 📞 <a href="tel:03174084613" class="hover:text-white">0317-4084613</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Filter Script -->
+    <script>
+        function filterClasses(level) {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                if(level === 'all') {
+                    row.style.display = '';
+                } else {
+                    const cells = row.querySelectorAll('td');
+                    let hasClass = false;
+                    for(let i = 1; i < cells.length; i++) {
+                        if(cells[i].textContent.includes(level)) {
+                            hasClass = true;
+                            break;
+                        }
+                    }
+                    row.style.display = hasClass ? '' : 'none';
+                }
+            });
+        }
+    </script>
+
+    <!-- WhatsApp Button -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <a href="https://wa.me/923174084613?text=Hi%20Paths%20Tiger%2C%20I'm%20interested%20in%20your%20class%20schedule" 
+           target="_blank"
+           class="flex items-center justify-center w-14 h-14 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition transform hover:scale-110">
+            <span class="text-3xl">📱</span>
+        </a>
+    </div>
+</body>
+</html>

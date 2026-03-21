@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Gallery - Paths Tiger Taekwondo Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .lightbox.active {
+            display: flex;
+        }
+        
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 50px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: transform 0.2s;
+        }
+        
+        .lightbox-close:hover {
+            transform: scale(1.1);
+            color: #f97316;
+        }
+        
+        .lightbox-prev, .lightbox-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 50px;
+            cursor: pointer;
+            padding: 20px;
+            z-index: 1001;
+            transition: all 0.2s;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .lightbox-prev:hover, .lightbox-next:hover {
+            background: rgba(249, 115, 22, 0.8);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .lightbox-prev { left: 20px; }
+        .lightbox-next { right: 20px; }
+        
+        .lightbox-caption {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            background: rgba(0,0,0,0.7);
+            padding: 12px;
+            margin: 0 auto;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 50px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .gallery-item {
+            transition: transform 0.3s ease;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Filter button active state */
+        .filter-btn.active {
+            background-color: #ea580c;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-orange-500 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl">🦁</span>
+                    <span class="font-bold text-xl text-white">Paths Tiger Taekwondo Academy</span>
+                </div>
+                <div class="hidden md:block">
+                    <ul class="flex space-x-6">
+                        <li><a href="index.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded transition">Home</a></li>
+                        <li><a href="about.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded transition">About</a></li>
+                        <li><a href="programs.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded transition">Programs</a></li>
+                        <li><a href="contact.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded transition">Contact Us</a></li>
+                        <li><a href="gallery.html" class="cursor-pointer px-2 py-2 text-white bg-amber-600 rounded transition">Gallery</a></li>
+                        <li><a href="schedule.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded transition">Schedule</a></li>
+                    </ul>
+                </div>
+                <a href="login.html" class="text-white px-4 py-2 hover:bg-purple-950 transition bg-amber-950 rounded-2xl">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class=" from-orange-600 to-orange-700 text-white py-16">
+        <div class="max-w-7xl mx-auto text-center px-4">
+            <h1 class="text-5xl font-black mb-4">Photo <span class="text-black">Gallery</span></h1>
+            <p class="text-xl max-w-3xl mx-auto">Moments from our classes, events, and celebrations</p>
+        </div>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex flex-wrap gap-2 justify-center">
+            <button onclick="filterGallery('all')" class="filter-btn px-6 py-2 bg-orange-600 text-white rounded-full font-semibold transition" data-filter="all">All</button>
+            <button onclick="filterGallery('classes')" class="filter-btn px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition" data-filter="classes">Classes</button>
+            <button onclick="filterGallery('belt-tests')" class="filter-btn px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition" data-filter="belt-tests">Belt Tests</button>
+            <button onclick="filterGallery('events')" class="filter-btn px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition" data-filter="events">Events</button>
+            <button onclick="filterGallery('competitions')" class="filter-btn px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition" data-filter="competitions">Competitions</button>
+            <button onclick="filterGallery('facility')" class="filter-btn px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition" data-filter="facility">Facility</button>
+        </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="gallery-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            
+            <!-- Gallery Item 1 - Class -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="classes" onclick="openLightbox(0)">
+                <img src="https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/481048422_1335282597741884_8455039765438535483_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=104&ccb=1-7&_nc_sid=7b2446&_nc_ohc=XWcYybYY6YQQ7kNvwGUnTMU&_nc_oc=Adpi0npscn3zM7Y5LDxN2K6GlumwtUVYYjRtyMqlR6YmaHkWcxHH7MygBl337X-5lT0&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=0ojP-hnEBfsVWGwr1uSi9g&_nc_ss=7a30f&oh=00_AfxNblCLioI04kWtiSQyJ_3Hp6DRYt-GorXO8V8wi1lzEw&oe=69C4B4AE" 
+                     class="w-full h-64 object-cover" 
+                     alt="Taekwondo class in action">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-orange-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Class</div>
+            </div>
+
+            <!-- Gallery Item 2 - Class -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="classes" onclick="openLightbox(1)">
+                <img src="https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/480238030_1335282647741879_7857602459033738243_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=110&ccb=1-7&_nc_sid=7b2446&_nc_ohc=FnLyTRveRvYQ7kNvwFGGAKT&_nc_oc=AdqQnStW5Lq5H1WfyE2NEBvL7oCcqXUpKtflNG5POCxmd5LaPUzUOoU5ccyUMu892DQ&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=GL9sRdxgchKvyrUzEkIb6g&_nc_ss=7a30f&oh=00_AfwTnMnR9u103Lnqw7k8C7f-RPHRRBYSsgNBUm-FKj96yg&oe=69C4B984" 
+                     class="w-full h-64 object-cover" 
+                     alt="Students practicing Taekwondo">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-orange-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Class</div>
+            </div>
+
+            <!-- Gallery Item 3 - Belt Test -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="belt-tests" onclick="openLightbox(2)">
+                <img src="https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/480689759_1336032721000205_6492287235313818663_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_aid=0&_nc_ohc=RE51QNkk-5MQ7kNvwFyoG_f&_nc_oc=Adql0ADw0E98tuqg8WkTjtmFhzZdB_sVcGjbdN_z8PhFcMVGpomamyObSa6bcoxMtiM&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=GIAG7qDspogjCl6WjPl3Eg&_nc_ss=7a30f&oh=00_AfwhFdfxJc77aYw_5WrexWTeSMAvb7TPK3pYJUayHh8Kuw&oe=69C4C3EE" 
+                     class="w-full h-64 object-cover" 
+                     alt="Belt testing ceremony">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Belt Test</div>
+            </div>
+
+            <!-- Gallery Item 4 - Event -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="events" onclick="openLightbox(3)">
+                <img src="https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/473681531_1315427739727370_5200993637244889726_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_ohc=A3RXDSNl8wsQ7kNvwG1z2ou&_nc_oc=AdqtWN_wtRm4eURoa94wiCyE6crZmX4dRnmKWpDaZE5m_n27Bptsc6DWigF7NgcAYRk&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=5uIB_QrPvTICc688WyRQJA&_nc_ss=7a30f&oh=00_AfxhqHjZQClzcGSKEgwjLKLQNnKmva0UBD09yzPxKX9amQ&oe=69C4D484" 
+                     class="w-full h-64 object-cover" 
+                     alt="Special event celebration">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-green-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Event</div>
+            </div>
+
+            <!-- Gallery Item 5 - Competition -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="competitions" onclick="openLightbox(4)">
+                <img src="https://scontent.flhe11-1.fna.fbcdn.net/v/t1.6435-9/45742643_1544156289064404_8583401023324815360_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=7b2446&_nc_ohc=9GSTMrbjbzIQ7kNvwGE6Ajv&_nc_oc=AdoROTfbnDFF2uEpvamH7NVqtokliQUIgfPPo8_fx5MCzz6ZDBS72lnjW6TVli4ZfQw&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=VU559h15nv2gCtBOgWmYFg&_nc_ss=7a30f&oh=00_Afw4r5qYUGgGjqxM0BJErKnvkak8G6d9GbQmIVqyeq0KwQ&oe=69E685DB" 
+                     class="w-full h-64 object-cover" 
+                     alt="Competition highlights">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-purple-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Competition</div>
+            </div>
+
+            <!-- Gallery Item 6 - Class -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="classes" onclick="openLightbox(5)">
+                <img src="https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/480736105_1335282777741866_6647601450216978784_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_ohc=9ahgmsXM6dsQ7kNvwFUJILD&_nc_oc=AdqHQ67CPPq34aFwWdmhj0rkHiffYvCaZiQmd-z9DLItda8PgmzLP2ohKiaaKq6SX4c&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=wehN_DnOY3hVL8JexsdJuw&_nc_ss=7a30f&oh=00_AfzVzprm2ab0maaruCjgv7WKe2WK_HzB2Lxf07MxEMy_-A&oe=69C4DE7C" 
+                     class="w-full h-64 object-cover" 
+                     alt="Taekwondo training session">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-orange-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Class</div>
+            </div>
+
+            <!-- Gallery Item 7 - Facility -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="facility" onclick="openLightbox(6)">
+                <img src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=600&h=400&fit=crop" 
+                     class="w-full h-64 object-cover" 
+                     alt="Training facility">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-gray-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Facility</div>
+            </div>
+
+            <!-- Gallery Item 8 - Belt Test -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="belt-tests" onclick="openLightbox(7)">
+                <img src="https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/480679815_1335963921007085_7542786417571400601_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=104&ccb=1-7&_nc_sid=7b2446&_nc_ohc=LOrDxwnKOyIQ7kNvwENUQxI&_nc_oc=AdqO6qWdr75wJyyEs12tRdK87XiMNyAUf8SNSeNmMybQn1cFiM50Yf75Ni68sH7P-0o&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=TaQhHEt93w9FwC7I1qhYIA&_nc_ss=7a30f&oh=00_AfyCwwvnwetBZa_C6VDEAf-IdO5oTupPp1buj5o4330xtQ&oe=69C4E9C5" 
+                     class="w-full h-64 object-cover" 
+                     alt="Belt promotion ceremony">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Belt Test</div>
+            </div>
+
+            <!-- Gallery Item 9 - Competition -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="competitions" onclick="openLightbox(8)">
+                <img src="https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/624532953_1633407224596085_2029373662237635478_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=7b2446&_nc_ohc=jlNSoy9PEO8Q7kNvwGiciSL&_nc_oc=AdrdTjrukm7ZwqnZmDsFB87gb7mtf071-tZABZA0tLWmfYR39BVOj3Uo7h_Xa8AsIfE&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=o-s9_XnBiiTKfql9MgxvwA&_nc_ss=7a30f&oh=00_AfycAV91dgcP7WoeHwK7weLTm67cODuzewJRZpGmkxNCZA&oe=69C4E008" 
+                     class="w-full h-64 object-cover" 
+                     alt="Tournament competition">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-purple-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Competition</div>
+            </div>
+
+            <!-- Gallery Item 10 - Event -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="events" onclick="openLightbox(9)">
+                <img src="https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/473036099_1307130580557086_1582910921547417231_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=7b2446&_nc_ohc=G_0oDgVpn-sQ7kNvwENRxEi&_nc_oc=Adogq5zkFf7_ImQzboqVJo77kOnc-sOqv0XaEY5apab067kny6POOUBWtIu3gBA1UiE&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=xbHGUdKowU3TNe5SiY0zrw&_nc_ss=7a30f&oh=00_AfwPoBINdy9v_OiYsgOLF9ADOc38zcgIfkiErA2r2FRhZw&oe=69C4CF90" 
+                     class="w-full h-64 object-cover" 
+                     alt="Academy event celebration">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-green-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Event</div>
+            </div>
+
+            <!-- Gallery Item 11 - Facility -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="facility" onclick="openLightbox(10)">
+                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop" 
+                     class="w-full h-64 object-cover" 
+                     alt="Dojang interior">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-gray-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Facility</div>
+            </div>
+
+            <!-- Gallery Item 12 - Class -->
+            <div class="gallery-item relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="classes" onclick="openLightbox(11)">
+                <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&h=400&fit=crop" 
+                     class="w-full h-64 object-cover" 
+                     alt="Kids Taekwondo class">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <span class="text-white font-semibold opacity-0 group-hover:opacity-100 transition">🔍 View</span>
+                </div>
+                <div class="absolute top-3 left-3 bg-orange-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-md">Class</div>
+            </div>
+        </div>
+        
+        <!-- Load More Button -->
+        <div class="text-center mt-12">
+            <button onclick="loadMoreImages()" class="bg-orange-600 text-white px-10 py-3 rounded-full font-bold hover:bg-orange-700 transition shadow-md hover:shadow-lg">
+                Load More Photos
+            </button>
+        </div>
+    </div>
+
+    <!-- Video Section -->
+    <div class="bg-gray-100 py-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4">Class <span class="text-orange-600">Videos</span></h2>
+            <p class="text-center text-gray-600 mb-12">Watch our students in action</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Video 1 - Little Tigers Demo -->
+                <div class="bg-white p-4 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="relative h-64 bg-gray-900 rounded-lg overflow-hidden group cursor-pointer" onclick="openVideoModal('EmdiISpZ9Tc', 'Little Tigers Class Demo', 'Watch our youngest students show their skills in this exciting demonstration. These little warriors showcase discipline, focus, and amazing techniques!')">
+                        <img src="https://img.youtube.com/vi/EmdiISpZ9Tc/maxresdefault.jpg" 
+                             alt="Little Tigers Demo" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                             onerror="this.src='https://img.youtube.com/vi/EmdiISpZ9Tc/hqdefault.jpg'">
+                        <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition flex items-center justify-center">
+                            <div class="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                <span class="text-3xl text-white ml-1">▶️</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold mt-3 text-lg">Little Tigers Class Demo</h3>
+                    <p class="text-sm text-gray-600">Watch our youngest students show their skills</p>
+                </div>
+                
+                <!-- Video 2 - Belt Testing -->
+                <div class="bg-white p-4 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="relative h-64 bg-gray-900 rounded-lg overflow-hidden group cursor-pointer" onclick="openVideoModal('7Qtm90MHeZY', 'Belt Testing Ceremony', 'December 2025 belt test highlights. Watch our dedicated students demonstrate their progress and earn their new belts!')">
+                        <img src="https://img.youtube.com/vi/7Qtm90MHeZY/maxresdefault.jpg" 
+                             alt="Belt Testing" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                             onerror="this.src='https://img.youtube.com/vi/7Qtm90MHeZY/hqdefault.jpg'">
+                        <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition flex items-center justify-center">
+                            <div class="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                <span class="text-3xl text-white ml-1">▶️</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold mt-3 text-lg">Belt Testing Ceremony</h3>
+                    <p class="text-sm text-gray-600">December 2025 belt test highlights</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+        <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
+        <span class="lightbox-prev" onclick="changeImage(-1)">&#10094;</span>
+        <span class="lightbox-next" onclick="changeImage(1)">&#10095;</span>
+        <img id="lightbox-img" src="" alt="">
+        <div id="lightbox-caption" class="lightbox-caption"></div>
+    </div>
+
+    <!-- Video Modal -->
+    <div id="videoModal" class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-4" onclick="closeVideoModal()">
+        <div class="relative w-full max-w-5xl" onclick="event.stopPropagation()">
+            <button onclick="closeVideoModal()" class="absolute -top-12 right-0 text-white text-4xl hover:text-orange-500 transition z-10">
+                &times;
+            </button>
+            <div class="relative bg-black rounded-2xl overflow-hidden shadow-2xl">
+                <div id="videoContainer" class="relative w-full" style="padding-bottom: 56.25%;">
+                    <div id="youtubePlayer" class="absolute top-0 left-0 w-full h-full"></div>
+                </div>
+            </div>
+            <div id="videoInfo" class="mt-4 text-white">
+                <h3 id="videoTitle" class="text-2xl font-bold">Video Title</h3>
+                <p id="videoDescription" class="text-gray-300 mt-2">Video description</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <span class="text-2xl font-bold">🐯 Paths Tiger</span>
+                    <p class="text-sm text-gray-400 mt-1">Taekwondo Academy</p>
+                </div>
+                <div class="text-sm text-gray-400">
+                    © 2026 All Rights Reserved | My Paths Tiger Taekwondo Academy
+                </div>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📘</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📷</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">▶️</a>
+                </div>
+            </div>
+            <div class="text-center text-sm text-gray-400 mt-4 pt-4 border-t border-gray-800">
+                <p>🏪 Open: Monday-Friday 3PM-8PM | Saturday 9AM-1PM | Sunday Closed</p>
+                <p class="mt-2">📍 Hospital Road, Manga Mandi Lahore | 📞 <a href="tel:03174084613" class="hover:text-white">0317-4084613</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Button -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <a href="https://wa.me/923174084613?text=Hi%20Paths%20Tiger%2C%20I%20saw%20your%20gallery%20and%20have%20a%20question" 
+           target="_blank"
+           class="flex items-center justify-center w-14 h-14 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition transform hover:scale-110">
+            <span class="text-3xl">💬</span>
+        </a>
+    </div>
+
+    <script>
+        // Gallery Images Data
+        const galleryImages = [
+            { src: "https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/481048422_1335282597741884_8455039765438535483_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=104&ccb=1-7&_nc_sid=7b2446&_nc_ohc=XWcYybYY6YQQ7kNvwGUnTMU&_nc_oc=Adpi0npscn3zM7Y5LDxN2K6GlumwtUVYYjRtyMqlR6YmaHkWcxHH7MygBl337X-5lT0&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=0ojP-hnEBfsVWGwr1uSi9g&_nc_ss=7a30f&oh=00_AfxNblCLioI04kWtiSQyJ_3Hp6DRYt-GorXO8V8wi1lzEw&oe=69C4B4AE", caption: "Taekwondo class in action - Students practicing their forms" },
+            { src: "https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/480238030_1335282647741879_7857602459033738243_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=110&ccb=1-7&_nc_sid=7b2446&_nc_ohc=FnLyTRveRvYQ7kNvwFGGAKT&_nc_oc=AdqQnStW5Lq5H1WfyE2NEBvL7oCcqXUpKtflNG5POCxmd5LaPUzUOoU5ccyUMu892DQ&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=GL9sRdxgchKvyrUzEkIb6g&_nc_ss=7a30f&oh=00_AfwTnMnR9u103Lnqw7k8C7f-RPHRRBYSsgNBUm-FKj96yg&oe=69C4B984", caption: "Students practicing Taekwondo techniques" },
+            { src: "https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/480679815_1335963921007085_7542786417571400601_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=104&ccb=1-7&_nc_sid=7b2446&_nc_ohc=LOrDxwnKOyIQ7kNvwENUQxI&_nc_oc=AdqO6qWdr75wJyyEs12tRdK87XiMNyAUf8SNSeNmMybQn1cFiM50Yf75Ni68sH7P-0o&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=TaQhHEt93w9FwC7I1qhYIA&_nc_ss=7a30f&oh=00_AfyCwwvnwetBZa_C6VDEAf-IdO5oTupPp1buj5o4330xtQ&oe=69C4E9C5", caption: "Belt testing ceremony - Celebrating achievement" },
+            { src: "https://scontent.flhe11-1.fna.fbcdn.net/v/t39.30808-6/473681531_1315427739727370_5200993637244889726_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_ohc=A3RXDSNl8wsQ7kNvwG1z2ou&_nc_oc=AdqtWN_wtRm4eURoa94wiCyE6crZmX4dRnmKWpDaZE5m_n27Bptsc6DWigF7NgcAYRk&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=5uIB_QrPvTICc688WyRQJA&_nc_ss=7a30f&oh=00_AfxhqHjZQClzcGSKEgwjLKLQNnKmva0UBD09yzPxKX9amQ&oe=69C4D484", caption: "Special event celebration - Academy gathering" },
+            { src: "https://scontent.flhe11-1.fna.fbcdn.net/v/t1.6435-9/45742643_1544156289064404_8583401023324815360_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=7b2446&_nc_ohc=9GSTMrbjbzIQ7kNvwGE6Ajv&_nc_oc=AdoROTfbnDFF2uEpvamH7NVqtokliQUIgfPPo8_fx5MCzz6ZDBS72lnjW6TVli4ZfQw&_nc_zt=23&_nc_ht=scontent.flhe11-1.fna&_nc_gid=VU559h15nv2gCtBOgWmYFg&_nc_ss=7a30f&oh=00_Afw4r5qYUGgGjqxM0BJErKnvkak8G6d9GbQmIVqyeq0KwQ&oe=69E685DB", caption: "Competition highlights - Students showcasing their skills" },
+            { src: "https://images.unsplash.com/photo-1555597673-b21d5c935865?w=600&h=400&fit=crop", caption: "Advanced training session - Sparring practice" },
+            { src: "https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=600&h=400&fit=crop", caption: "Modern training facility - Dojang interior" },
+            { src: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=400&fit=crop", caption: "Belt promotion ceremony - New belt presentation" },
+            { src: "https://images.unsplash.com/photo-1555597673-b21d5c935865?w=600&h=400&fit=crop", caption: "Tournament competition - Medal ceremony" },
+            { src: "https://images.unsplash.com/photo-1552074284-5e88ef1aef18?w=600&h=400&fit=crop", caption: "Annual academy celebration - Group photo" },
+            { src: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop", caption: "Training equipment and mats" },
+            { src: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&h=400&fit=crop", caption: "Little Tigers class - Kids learning Taekwondo" }
+        ];
+        
+        let currentImageIndex = 0;
+
+        function openLightbox(index) {
+            currentImageIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxCaption = document.getElementById('lightbox-caption');
+            
+            lightboxImg.src = galleryImages[currentImageIndex].src;
+            lightboxCaption.textContent = galleryImages[currentImageIndex].caption;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox(event) {
+            if (event.target === document.getElementById('lightbox') || event.target.classList.contains('lightbox-close')) {
+                document.getElementById('lightbox').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function changeImage(direction) {
+            currentImageIndex += direction;
+            if (currentImageIndex < 0) currentImageIndex = galleryImages.length - 1;
+            if (currentImageIndex >= galleryImages.length) currentImageIndex = 0;
+            
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxCaption = document.getElementById('lightbox-caption');
+            
+            lightboxImg.style.opacity = '0';
+            setTimeout(() => {
+                lightboxImg.src = galleryImages[currentImageIndex].src;
+                lightboxCaption.textContent = galleryImages[currentImageIndex].caption;
+                lightboxImg.style.opacity = '1';
+            }, 200);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'Escape') closeLightbox(e);
+                if (e.key === 'ArrowLeft') changeImage(-1);
+                if (e.key === 'ArrowRight') changeImage(1);
+            }
+        });
+
+        function filterGallery(category) {
+            const items = document.querySelectorAll('.gallery-item');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-filter') === category) {
+                    btn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+                    btn.classList.add('bg-orange-600', 'text-white');
+                } else {
+                    btn.classList.remove('bg-orange-600', 'text-white');
+                    btn.classList.add('bg-gray-200', 'hover:bg-gray-300');
+                }
+            });
+            
+            items.forEach(item => {
+                if (category === 'all' || item.getAttribute('data-category') === category) {
+                    item.style.display = 'block';
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'scale(1)';
+                    }, 10);
+                } else {
+                    item.style.opacity = '0';
+                    item.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        item.style.display = 'none';
+                    }, 300);
+                }
+            });
+        }
+
+        function loadMoreImages() {
+            alert('✨ More amazing photos will be added soon! Follow us on social media for updates. 📸');
+        }
+
+        // Video Modal Functions
+        function openVideoModal(videoId, title, description) {
+            const modal = document.getElementById('videoModal');
+            document.getElementById('videoTitle').textContent = title;
+            document.getElementById('videoDescription').textContent = description;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            
+            const playerContainer = document.getElementById('youtubePlayer');
+            playerContainer.innerHTML = '';
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&enablejsapi=1`;
+            iframe.title = title;
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            iframe.allowFullscreen = true;
+            iframe.className = "absolute top-0 left-0 w-full h-full";
+            playerContainer.appendChild(iframe);
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+            
+            const playerContainer = document.getElementById('youtubePlayer');
+            if (playerContainer) {
+                playerContainer.innerHTML = '';
+            }
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('videoModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    closeVideoModal();
+                }
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearElement = document.querySelector('footer .text-gray-400');
+            if (yearElement) {
+                const currentYear = new Date().getFullYear();
+                yearElement.innerHTML = yearElement.innerHTML.replace('2026', currentYear);
+            }
+        });
+    </script>
+</body>
+</html>

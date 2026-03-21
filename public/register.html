@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Register - Paths Tiger Taekwondo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .success-animation {
+            animation: fadeInOut 3s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+        .password-strength {
+            height: 4px;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-orange-500 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl">🦁</span>
+                    <span class="font-bold text-xl text-white">Paths Tiger Taekwondo Academy</span>
+                </div>
+                <div class="hidden md:block">
+                    <ul class="flex space-x-6">
+                        <li><a href="index.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Home</a></li>
+                        <li><a href="about.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">About</a></li>
+                        <li><a href="programs.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Programs</a></li>
+                        <li><a href="contact.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Contact Us</a></li>
+                        <li><a href="gallery.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Gallery</a></li>
+                        <li><a href="schedule.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Schedule</a></li>
+                    </ul>
+                </div>
+                <a href="login.html" class="text-white px-4 py-2 hover:bg-purple-950 transition bg-amber-950 rounded-2xl">Member Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Registration Form -->
+    <div class="min-h-screen flex items-center justify-center py-12 px-4">
+        <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <span class="text-6xl">🥋</span>
+                <h2 class="text-3xl font-bold mt-4">Become a Member</h2>
+                <p class="text-gray-600">Join the Paths Tiger family today!</p>
+            </div>
+
+            <!-- Success Message (hidden by default) -->
+            <div id="successMessage" class="hidden success-animation mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-3">✅</span>
+                    <div>
+                        <p class="font-bold">Registration successful!</p>
+                        <p class="text-sm" id="successText">Your account has been created. Redirecting to login...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message (hidden by default) -->
+            <div id="errorMessage" class="hidden mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-3">❌</span>
+                    <div>
+                        <p class="font-bold">Registration failed</p>
+                        <p class="text-sm" id="errorText">Please check your information and try again.</p>
+                    </div>
+                </div>
+            </div>
+
+            <form id="registerForm" class="space-y-6">
+                <!-- Personal Information -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Full Name *</label>
+                        <input type="text" id="name" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600"
+                               placeholder="Enter your full name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Phone Number *</label>
+                        <input type="tel" id="phone" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600"
+                               placeholder="0317-4084613">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Email Address *</label>
+                    <input type="email" id="email" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600"
+                           placeholder="your@email.com">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Date of Birth</label>
+                    <input type="date" id="dateOfBirth" 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Address</label>
+                    <input type="text" id="address" 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600"
+                           placeholder="Your residential address">
+                </div>
+
+                <!-- Program Selection -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Select Program *</label>
+                    <select id="program" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
+                        <option value="">Choose a program...</option>
+                        <option value="Little Tigers">Little Tigers (Ages 3-5)</option>
+                        <option value="Junior Program">Junior Program (Ages 6-12)</option>
+                        <option value="Teen/Adult Program">Teen/Adult Program (Ages 13+)</option>
+                        <option value="Family Classes">Family Classes</option>
+                    </select>
+                </div>
+
+                <!-- Membership Plan - FIXED -->
+                <div>
+                    <label class="block text-sm font-medium mb-3">Membership Plan *</label>
+                    <div class="grid md:grid-cols-3 gap-3">
+                        <label class="border rounded-lg p-4 cursor-pointer hover:border-orange-600 transition">
+                            <input type="radio" name="plan" value="Basic" class="mr-2" checked> Basic
+                            <p class="text-sm text-gray-600">Rs. 7,900/month</p>
+                        </label>
+                        <label class="border rounded-lg p-4 cursor-pointer hover:border-orange-600 transition">
+                            <input type="radio" name="plan" value="Family" class="mr-2"> Family
+                            <p class="text-sm text-gray-600">Rs. 14,900/month</p>
+                        </label>
+                        <label class="border rounded-lg p-4 cursor-pointer hover:border-orange-600 transition">
+                            <input type="radio" name="plan" value="Premium" class="mr-2"> Premium
+                            <p class="text-sm text-gray-600">Rs. 12,900/month</p>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Create Password -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password *</label>
+                        <input type="password" id="password" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600"
+                               placeholder="Min. 6 characters">
+                        <div class="mt-2">
+                            <div class="password-strength w-full bg-gray-200 rounded-full overflow-hidden">
+                                <div id="passwordStrength" class="h-1 bg-red-500" style="width: 0%"></div>
+                            </div>
+                            <p id="passwordHint" class="text-xs text-gray-500 mt-1">Use at least 6 characters</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Confirm Password *</label>
+                        <input type="password" id="confirmPassword" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
+                        <p id="passwordMatch" class="text-xs mt-1 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Terms -->
+                <div class="flex items-center">
+                    <input type="checkbox" id="terms" required class="h-4 w-4 text-orange-600 rounded">
+                    <label for="terms" class="ml-2 text-sm text-gray-600">
+                        I agree to the <a href="#" class="text-orange-600 hover:underline">Terms and Conditions</a> and 
+                        <a href="#" class="text-orange-600 hover:underline">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit" id="submitButton" 
+                        class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="buttonText">Create Account</span>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">Already have an account? <a href="login.html" class="text-orange-600 hover:underline font-semibold">Login here</a></p>
+            </div>
+
+            <div class="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-gray-600">
+                <p class="font-semibold mb-1">📝 Note:</p>
+                <p>After registration, you'll receive a welcome email and can login immediately.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <span class="text-2xl font-bold">🐯 Paths Tiger</span>
+                    <p class="text-sm text-gray-400 mt-1">Taekwondo Academy</p>
+                </div>
+                <div class="text-sm text-gray-400">
+                    © 2026 All Rights Reserved | My Paths Tiger Taekwondo Academy
+                </div>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📘</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">📷</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition text-2xl">▶️</a>
+                </div>
+            </div>
+            <div class="text-center text-sm text-gray-400 mt-4 pt-4 border-t border-gray-800">
+                <p>🏪 Open: Monday-Friday 3PM-8PM | Saturday 9AM-1PM | Sunday Closed</p>
+                <p class="mt-2">📍 Hospital Road, Manga Mandi Lahore | 📞 <a href="tel:03174084613" class="hover:text-white">0317-4084613</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Registration Script -->
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const passwordHint = document.getElementById('passwordHint');
+        const passwordMatch = document.getElementById('passwordMatch');
+
+        passwordInput.addEventListener('input', function() {
+            const strength = checkPasswordStrength(this.value);
+            updatePasswordStrength(strength);
+            checkPasswordMatch();
+        });
+
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 6) strength += 25;
+            if (password.length >= 8) strength += 25;
+            if (/[A-Z]/.test(password)) strength += 25;
+            if (/[0-9]/.test(password)) strength += 25;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+            return Math.min(strength, 100);
+        }
+
+        function updatePasswordStrength(strength) {
+            passwordStrength.style.width = strength + '%';
+            if (strength < 50) {
+                passwordStrength.className = 'h-1 bg-red-500';
+                passwordHint.textContent = 'Weak password';
+            } else if (strength < 75) {
+                passwordStrength.className = 'h-1 bg-yellow-500';
+                passwordHint.textContent = 'Medium password';
+            } else {
+                passwordStrength.className = 'h-1 bg-green-500';
+                passwordHint.textContent = 'Strong password';
+            }
+        }
+
+        function checkPasswordMatch() {
+            const password = passwordInput.value;
+            const confirm = confirmPasswordInput.value;
+            
+            if (confirm.length === 0) {
+                passwordMatch.classList.add('hidden');
+                return;
+            }
+            
+            passwordMatch.classList.remove('hidden');
+            if (password === confirm) {
+                passwordMatch.textContent = '✓ Passwords match';
+                passwordMatch.className = 'text-xs text-green-600 mt-1';
+            } else {
+                passwordMatch.textContent = '✗ Passwords do not match';
+                passwordMatch.className = 'text-xs text-red-600 mt-1';
+            }
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const dateOfBirth = document.getElementById('dateOfBirth').value;
+            const address = document.getElementById('address').value;
+            const program = document.getElementById('program').value;
+            
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+            
+            if (!program) {
+                showError('Please select a program');
+                return;
+            }
+            
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            successMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            
+            submitButton.disabled = true;
+            buttonText.innerHTML = '<span class="loading"></span> Creating account...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name, email, password, phone, address, dateOfBirth
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successMessage.classList.remove('hidden');
+                    document.getElementById('registerForm').reset();
+                    passwordStrength.style.width = '0%';
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    
+                } else {
+                    showError(data.message || 'Registration failed. Please try again.');
+                    submitButton.disabled = false;
+                    buttonText.textContent = 'Create Account';
+                }
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError('Connection error. Please make sure the backend server is running at ' + API_BASE_URL);
+                submitButton.disabled = false;
+                buttonText.textContent = 'Create Account';
+            }
+        });
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 5000);
+        }
+
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value.length <= 4) {
+                    value = value;
+                } else if (value.length <= 7) {
+                    value = value.slice(0,4) + '-' + value.slice(4);
+                } else {
+                    value = value.slice(0,4) + '-' + value.slice(4,7) + '-' + value.slice(7,11);
+                }
+                e.target.value = value;
+            }
+        });
+    </script>
+
+    <!-- WhatsApp Button -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <a href="https://wa.me/923174084613?text=Hi%20Paths%20Tiger%2C%20I'm%20interested%20in%20registering%20for%20classes" 
+           target="_blank"
+           class="flex items-center justify-center w-14 h-14 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition transform hover:scale-110">
+            <span class="text-3xl">📱</span>
+        </a>
+    </div>
+
+</body>
+</html>
