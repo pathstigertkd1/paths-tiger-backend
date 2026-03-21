@@ -8,8 +8,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #F97316; animation: spin 1s ease-in-out infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .grade-input { width: 60px; text-align: center; }
+        .observation-card:hover { transform: translateY(-2px); }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -19,247 +19,162 @@
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         
-        console.log('Instructor Dashboard - Token exists:', !!token);
-        console.log('Instructor Dashboard - User:', user);
-        console.log('Instructor Dashboard - User role:', user.role);
-        
-        // Check if user is logged in
-        if (!token) {
-            console.log('No token found, redirecting to instructor login');
+        if (!token || (user.role !== 'instructor' && user.role !== 'admin')) {
             window.location.href = 'instructor-login.html';
         }
         
-        // Check if user has instructor role
-        if (user.role !== 'instructor' && user.role !== 'admin') {
-            console.log('User is not an instructor, role:', user.role);
-            alert('Access denied. Instructor privileges required.');
-            window.location.href = 'login.html';
-        }
+        let currentClass = 'Little Tigers';
+        let currentDate = new Date().toISOString().split('T')[0];
         
         document.addEventListener('DOMContentLoaded', function() {
-            const instructorName = user.name || 'Instructor';
-            document.getElementById('instructorName').textContent = instructorName;
-            document.getElementById('instructorNameDisplay').textContent = instructorName;
-            console.log('Dashboard loaded for instructor:', instructorName);
-            loadTodaySchedule();
-            loadAllStudents();
+            document.getElementById('instructorName').textContent = user.name || 'Instructor';
+            loadStudents();
+            loadTests();
+            loadGrading();
+            loadObservations();
         });
         
-        function logout() {
-            console.log('Logging out');
-            localStorage.clear();
-            window.location.href = 'instructor-login.html';
-        }
+        function logout() { localStorage.clear(); window.location.href = 'instructor-login.html'; }
         
         function showSection(section) {
-            console.log('Showing section:', section);
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.getElementById(section + '-section').classList.remove('hidden');
-            if (section === 'attendance') loadStudentsForAttendance();
-            if (section === 'students') loadAllStudents();
+            if (section === 'students') loadStudents();
+            if (section === 'grading') loadGrading();
+            if (section === 'tests') loadTests();
+            if (section === 'observations') loadObservations();
         }
         
-        async function loadTodaySchedule() {
-            console.log('Loading today\'s schedule');
-            const schedule = [
-                { time: '4:00 PM', class: 'Little Tigers', room: 'Main Dojo', students: 8 },
-                { time: '5:00 PM', class: 'Junior Program', room: 'Main Dojo', students: 12 },
-                { time: '6:00 PM', class: 'Teen/Adult', room: 'Main Dojo', students: 10 }
-            ];
-            document.getElementById('todaySchedule').innerHTML = schedule.map(s => `
-                <div class="flex justify-between p-3 border-b">
-                    <div><span class="font-bold">${s.time}</span> - ${s.class}</div>
-                    <div class="text-gray-600">${s.students} students</div>
+        function setClass(classType) {
+            currentClass = classType;
+            document.querySelectorAll('.class-btn').forEach(btn => btn.classList.remove('bg-orange-600', 'text-white'));
+            event.target.classList.add('bg-orange-600', 'text-white');
+            loadStudents();
+            loadGrading();
+        }
+        
+        async function loadStudents() {
+            const container = document.getElementById('studentsList');
+            container.innerHTML = '<div class="text-center py-4">Loading students...</div>';
+            try {
+                const res = await fetch(`${API_BASE_URL}/instructor/students?class=${currentClass}`, { headers: { 'Authorization': 'Bearer ' + token } });
+                const students = await res.json();
+                if (students.length === 0) { container.innerHTML = '<div class="text-center py-4 text-gray-500">No students in this class</div>'; return; }
+                document.getElementById('studentCount').textContent = students.length;
+                container.innerHTML = students.map(s => `
+                    <div class="flex justify-between items-center p-3 border-b hover:bg-gray-50">
+                        <div><span class="font-medium">${s.name}</span><span class="text-xs text-gray-500 ml-2">${s.beltLevel || 'White'} Belt</span></div>
+                        <div class="flex gap-2">
+                            <button onclick="markAttendance(${s.id}, 'present')" class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200">Present</button>
+                            <button onclick="markAttendance(${s.id}, 'absent')" class="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200">Absent</button>
+                            <button onclick="viewStudentProfile(${s.id})" class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200">Profile</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) { container.innerHTML = '<div class="text-center py-4 text-red-500">Error loading students</div>'; }
+        }
+        
+        async function markAttendance(studentId, status) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/instructor/attendance`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ studentId, classType: currentClass, status, date: currentDate })
+                });
+                const data = await res.json();
+                if (data.success) { alert(`Attendance marked as ${status}`); loadStudents(); }
+                else alert('Error: ' + data.message);
+            } catch (error) { alert('Connection error'); }
+        }
+        
+        async function loadTests() {
+            const container = document.getElementById('testsList');
+            const tests = ['Forms (Poomsae)', 'Sparring', 'Breaking', 'Self-Defense', 'Written Test'];
+            container.innerHTML = tests.map(t => `
+                <div class="border rounded-lg p-4 mb-3">
+                    <div class="flex justify-between items-center mb-3"><h3 class="font-bold">${t}</h3><span class="text-sm text-gray-500">Due: March 30, 2026</span></div>
+                    <div class="flex gap-2"><button onclick="startTest('${t}')" class="bg-orange-600 text-white px-4 py-2 rounded text-sm">Start Test</button><button onclick="viewTestResults('${t}')" class="bg-gray-200 px-4 py-2 rounded text-sm">View Results</button></div>
                 </div>
             `).join('');
         }
         
-        async function loadAllStudents() {
-            console.log('Loading all students');
-            const container = document.getElementById('studentsList');
+        async function loadGrading() {
+            const container = document.getElementById('gradingList');
             container.innerHTML = '<div class="text-center py-4">Loading students...</div>';
-            
             try {
-                const response = await fetch(`${API_BASE_URL}/instructor/all-students`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const students = await response.json();
-                console.log('Students loaded:', students.length);
-                
-                if (students.length === 0) {
-                    container.innerHTML = '<div class="text-center py-4">No students found</div>';
-                    return;
-                }
-                
-                // Update total students count
-                document.getElementById('totalStudentsCount').textContent = students.length;
-                
+                const res = await fetch(`${API_BASE_URL}/instructor/students?class=${currentClass}`, { headers: { 'Authorization': 'Bearer ' + token } });
+                const students = await res.json();
+                if (students.length === 0) { container.innerHTML = '<div class="text-center py-4 text-gray-500">No students to grade</div>'; return; }
                 container.innerHTML = students.map(s => `
-                    <div class="flex justify-between items-center p-3 border-b hover:bg-gray-50">
-                        <div>
-                            <span class="font-medium">${s.name}</span>
-                            <span class="text-xs text-gray-500 ml-2">${s.beltLevel || 'White'} Belt</span>
+                    <div class="border rounded-lg p-4 mb-3 hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-3"><h3 class="font-bold">${s.name}</h3><span class="text-sm text-gray-500">${s.beltLevel} Belt</span></div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                            <div><label class="text-xs text-gray-600">Forms:</label><input type="number" id="forms-${s.id}" min="0" max="100" class="grade-input border rounded p-1 w-full" placeholder="0-100"></div>
+                            <div><label class="text-xs text-gray-600">Sparring:</label><input type="number" id="sparring-${s.id}" min="0" max="100" class="grade-input border rounded p-1 w-full" placeholder="0-100"></div>
+                            <div><label class="text-xs text-gray-600">Breaking:</label><input type="number" id="breaking-${s.id}" min="0" max="100" class="grade-input border rounded p-1 w-full" placeholder="0-100"></div>
+                            <div><label class="text-xs text-gray-600">Overall:</label><span id="overall-${s.id}" class="font-bold text-orange-600">0%</span></div>
                         </div>
-                        <div><span class="text-sm text-gray-600">${s.phone || '-'}</span></div>
+                        <button onclick="saveGrades(${s.id})" class="bg-green-600 text-white px-4 py-2 rounded text-sm">Save Grades</button>
                     </div>
                 `).join('');
-            } catch (error) {
-                console.error('Error loading students:', error);
-                container.innerHTML = '<div class="text-center py-4 text-red-500">Error loading students</div>';
-            }
+                students.forEach(s => { updateOverall(s.id); });
+            } catch (error) { container.innerHTML = '<div class="text-center py-4 text-red-500">Error loading students</div>'; }
         }
         
-        async function loadStudentsForAttendance() {
-            console.log('Loading students for attendance');
-            const container = document.getElementById('attendanceStudents');
-            container.innerHTML = '<div class="text-center py-4">Loading students...</div>';
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/instructor/all-students`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const students = await response.json();
-                
-                if (students.length === 0) {
-                    container.innerHTML = '<div class="text-center py-4">No students found</div>';
-                    return;
-                }
-                
-                container.innerHTML = students.map(s => `
-                    <div class="flex justify-between items-center p-3 border-b hover:bg-gray-50">
-                        <div>
-                            <span class="font-medium">${s.name}</span>
-                            <span class="text-xs text-gray-500 ml-2">${s.beltLevel || 'White'} Belt</span>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="markAttendance(${s.id}, 'present')" class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200">Present</button>
-                            <button onclick="markAttendance(${s.id}, 'absent')" class="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200">Absent</button>
-                            <button onclick="markAttendance(${s.id}, 'makeup')" class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-sm hover:bg-yellow-200">Makeup</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading students for attendance:', error);
-                container.innerHTML = '<div class="text-center py-4 text-red-500">Error loading students</div>';
-            }
+        function updateOverall(studentId) {
+            const forms = parseFloat(document.getElementById(`forms-${studentId}`)?.value) || 0;
+            const sparring = parseFloat(document.getElementById(`sparring-${studentId}`)?.value) || 0;
+            const breaking = parseFloat(document.getElementById(`breaking-${studentId}`)?.value) || 0;
+            const overall = Math.round((forms + sparring + breaking) / 3);
+            const overallSpan = document.getElementById(`overall-${studentId}`);
+            if (overallSpan) { overallSpan.textContent = overall + '%'; overallSpan.className = overall >= 70 ? 'font-bold text-green-600' : 'font-bold text-orange-600'; }
         }
         
-        async function markAttendance(studentId, status) {
-            console.log('Marking attendance:', studentId, status);
-            try {
-                const response = await fetch(`${API_BASE_URL}/instructor/attendance`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        studentId,
-                        classType: 'general',
-                        status,
-                        date: new Date().toISOString().split('T')[0]
-                    })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(`Attendance marked as ${status}`);
-                    loadStudentsForAttendance();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error marking attendance:', error);
-                alert('Connection error: ' + error.message);
-            }
+        async function saveGrades(studentId) {
+            const grades = { forms: document.getElementById(`forms-${studentId}`).value, sparring: document.getElementById(`sparring-${studentId}`).value, breaking: document.getElementById(`breaking-${studentId}`).value };
+            alert(`Grades saved for student ${studentId}\nForms: ${grades.forms}%\nSparring: ${grades.sparring}%\nBreaking: ${grades.breaking}%`);
         }
+        
+        async function loadObservations() {
+            const container = document.getElementById('observationsList');
+            container.innerHTML = `
+                <div class="border rounded-lg p-4 mb-3"><div class="flex justify-between"><h3 class="font-bold">Ahmed Khan</h3><span class="text-sm text-gray-500">Mar 22, 2026</span></div><p class="text-gray-600 mt-2">Excellent progress on forms. Needs improvement on sparring combinations.</p><div class="mt-2 text-sm text-gray-500">— Master Lee</div></div>
+                <div class="border rounded-lg p-4 mb-3"><div class="flex justify-between"><h3 class="font-bold">Fatima Ali</h3><span class="text-sm text-gray-500">Mar 20, 2026</span></div><p class="text-gray-600 mt-2">Great focus during class. Ready for yellow belt test.</p><div class="mt-2 text-sm text-gray-500">— Master Lee</div></div>
+            `;
+        }
+        
+        async function addObservation() {
+            const note = prompt('Enter your observation note:');
+            if (note) alert('Observation added: ' + note);
+        }
+        
+        function startTest(testName) { alert(`Starting ${testName} test...`); }
+        function viewTestResults(testName) { alert(`Viewing ${testName} results...`); }
+        function viewStudentProfile(id) { alert(`Viewing student profile...`); }
     </script>
 
     <div class="flex h-screen">
-        <!-- Sidebar -->
         <div class="w-64 bg-gray-900 text-white flex flex-col">
-            <div class="p-6 border-b border-gray-800">
-                <div class="flex items-center space-x-2">
-                    <span class="text-3xl">👨‍🏫</span>
-                    <span class="font-bold">Paths Tiger</span>
-                </div>
-                <p class="text-xs text-gray-400 mt-1">Instructor Panel</p>
-            </div>
-            <nav class="flex-1 p-4">
-                <ul class="space-y-2">
-                    <li><a href="#" onclick="showSection('dashboard'); return false;" class="block px-4 py-3 rounded-lg hover:bg-orange-600 transition">📊 Dashboard</a></li>
-                    <li><a href="#" onclick="showSection('attendance'); return false;" class="block px-4 py-3 rounded-lg hover:bg-orange-600 transition">📝 Take Attendance</a></li>
-                    <li><a href="#" onclick="showSection('students'); return false;" class="block px-4 py-3 rounded-lg hover:bg-orange-600 transition">👥 My Students</a></li>
-                </ul>
-            </nav>
-            <div class="p-4 border-t border-gray-800">
-                <div class="flex items-center space-x-3 mb-4">
-                    <div class="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center text-xl">👨‍🏫</div>
-                    <div>
-                        <p class="font-semibold" id="instructorName">Instructor</p>
-                        <p class="text-xs text-gray-400">Instructor</p>
-                    </div>
-                </div>
-                <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">Logout</button>
-            </div>
+            <div class="p-6 border-b border-gray-800"><div class="flex items-center space-x-2"><span class="text-3xl">👨‍🏫</span><span class="font-bold text-xl">Paths Tiger</span></div><p class="text-xs text-gray-400 mt-1">Instructor Panel</p></div>
+            <nav class="flex-1 p-4"><ul class="space-y-2"><li><a href="#" onclick="showSection('dashboard')" class="block px-4 py-3 rounded-lg hover:bg-orange-600 transition">📊 Dashboard</a></li><li><a href="#" onclick="showSection('students')" class="block px-4 py-3 rounded-lg hover:bg-orange-600 transition">👥 Students</a></li><li><a href="#" onclick="showSection('attendance')" class="block px-4 py-3 rounded-lg hover:bg-orange-600 transition">📝 Attendance</a></li><li><a href="#" onclick="showSection('grading')" class="block px-4 py-3 rounded-lg hover:bg-orange-600 transition">📊 Grading</a></li><li><a href="#" onclick="showSection('tests')" class="block px-4 py-3 rounded-lg hover:bg-orange-600 transition">📋 Tests</a></li><li><a href="#" onclick="showSection('observations')" class="block px-4 py-3 rounded-lg hover:bg-orange-600 transition">📝 Observations</a></li></ul></nav>
+            <div class="p-4 border-t border-gray-800"><div class="flex items-center space-x-3 mb-4"><div class="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center text-xl">👨‍🏫</div><div><p class="font-semibold" id="instructorName">Instructor</p><p class="text-xs text-gray-400">Instructor</p></div></div><button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">Logout</button></div>
         </div>
         
-        <!-- Main Content -->
         <div class="flex-1 overflow-auto">
-            <!-- Dashboard Section -->
             <div id="dashboard-section" class="section p-8">
                 <h1 class="text-3xl font-bold mb-2">Welcome, <span id="instructorNameDisplay">Instructor</span>!</h1>
-                <p class="text-gray-600 mb-6">Here's your teaching summary for today</p>
-                
-                <div class="grid md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white rounded-xl shadow p-6">
-                        <div class="text-3xl font-bold text-orange-600">3</div>
-                        <div class="text-gray-600">Today's Classes</div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow p-6">
-                        <div class="text-3xl font-bold text-orange-600" id="totalStudentsCount">0</div>
-                        <div class="text-gray-600">Total Students</div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow p-6">
-                        <div class="text-3xl font-bold text-orange-600">85%</div>
-                        <div class="text-gray-600">Avg Attendance</div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-xl font-bold mb-4">Today's Schedule</h2>
-                    <div id="todaySchedule"></div>
-                </div>
+                <div class="grid md:grid-cols-4 gap-6 mb-8 mt-6"><div class="bg-white rounded-xl shadow p-6"><div class="text-3xl font-bold text-orange-600">3</div><div class="text-gray-600">Today's Classes</div></div><div class="bg-white rounded-xl shadow p-6"><div class="text-3xl font-bold text-orange-600" id="studentCount">0</div><div class="text-gray-600">Total Students</div></div><div class="bg-white rounded-xl shadow p-6"><div class="text-3xl font-bold text-orange-600">85%</div><div class="text-gray-600">Avg Attendance</div></div><div class="bg-white rounded-xl shadow p-6"><div class="text-3xl font-bold text-orange-600">12</div><div class="text-gray-600">Tests This Week</div></div></div>
+                <div class="grid md:grid-cols-2 gap-6"><div class="bg-white rounded-xl shadow p-6"><h2 class="text-xl font-bold mb-4">📅 Today's Schedule</h2><div class="space-y-2"><div class="flex justify-between p-2 border-b"><div><span class="font-bold">4:00 PM</span> - Little Tigers</div><div>8 students</div></div><div class="flex justify-between p-2 border-b"><div><span class="font-bold">5:00 PM</span> - Junior Program</div><div>12 students</div></div><div class="flex justify-between p-2"><div><span class="font-bold">6:00 PM</span> - Teen/Adult</div><div>10 students</div></div></div></div><div class="bg-white rounded-xl shadow p-6"><h2 class="text-xl font-bold mb-4">⚡ Quick Actions</h2><button onclick="addObservation()" class="w-full bg-orange-600 text-white py-2 rounded-lg mb-2">📝 Add Observation</button><button onclick="window.location.href='contact.html'" class="w-full bg-blue-600 text-white py-2 rounded-lg">📞 Contact Admin</button></div></div>
             </div>
             
-            <!-- Attendance Section -->
-            <div id="attendance-section" class="section hidden p-8">
-                <h1 class="text-3xl font-bold mb-6">Take Attendance</h1>
-                <div class="bg-white rounded-xl shadow p-6">
-                    <div class="mb-4 flex justify-between items-center">
-                        <div>
-                            <label class="text-sm text-gray-600">Select Class:</label>
-                            <select class="ml-2 border rounded px-3 py-1">
-                                <option>Little Tigers</option>
-                                <option>Junior Program</option>
-                                <option>Teen/Adult</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-sm text-gray-600">Date:</label>
-                            <input type="date" value="2026-03-22" class="ml-2 border rounded px-3 py-1">
-                        </div>
-                    </div>
-                    <div id="attendanceStudents"></div>
-                </div>
-            </div>
+            <div id="students-section" class="section hidden p-8"><h1 class="text-3xl font-bold mb-6">My Students</h1><div class="flex flex-wrap gap-2 mb-6"><button onclick="setClass('Little Tigers')" class="class-btn px-4 py-2 bg-orange-600 text-white rounded-full">Little Tigers</button><button onclick="setClass('Junior Program')" class="class-btn px-4 py-2 bg-gray-200 rounded-full">Junior Program</button><button onclick="setClass('Teen/Adult Program')" class="class-btn px-4 py-2 bg-gray-200 rounded-full">Teen/Adult</button></div><div class="bg-white rounded-xl shadow"><div id="studentsList"></div></div></div>
             
-            <!-- Students Section -->
-            <div id="students-section" class="section hidden p-8">
-                <h1 class="text-3xl font-bold mb-6">My Students</h1>
-                <div class="bg-white rounded-xl shadow p-6">
-                    <div id="studentsList"></div>
-                </div>
-            </div>
+            <div id="attendance-section" class="section hidden p-8"><h1 class="text-3xl font-bold mb-6">Take Attendance</h1><div class="flex flex-wrap gap-2 mb-6"><button onclick="setClass('Little Tigers')" class="class-btn px-4 py-2 bg-orange-600 text-white rounded-full">Little Tigers</button><button onclick="setClass('Junior Program')" class="class-btn px-4 py-2 bg-gray-200 rounded-full">Junior Program</button></div><div class="bg-white rounded-xl shadow"><div id="studentsList"></div></div></div>
+            
+            <div id="grading-section" class="section hidden p-8"><h1 class="text-3xl font-bold mb-6">Student Grading</h1><div class="flex flex-wrap gap-2 mb-6"><button onclick="setClass('Little Tigers')" class="class-btn px-4 py-2 bg-orange-600 text-white rounded-full">Little Tigers</button><button onclick="setClass('Junior Program')" class="class-btn px-4 py-2 bg-gray-200 rounded-full">Junior Program</button></div><div class="bg-white rounded-xl shadow p-6"><div id="gradingList"></div></div></div>
+            
+            <div id="tests-section" class="section hidden p-8"><h1 class="text-3xl font-bold mb-6">Tests & Assessments</h1><div class="bg-white rounded-xl shadow p-6"><div id="testsList"></div></div></div>
+            
+            <div id="observations-section" class="section hidden p-8"><h1 class="text-3xl font-bold mb-6">Student Observations</h1><button onclick="addObservation()" class="mb-4 bg-orange-600 text-white px-4 py-2 rounded-lg">➕ Add Observation</button><div class="bg-white rounded-xl shadow p-6"><div id="observationsList"></div></div></div>
         </div>
     </div>
 </body>

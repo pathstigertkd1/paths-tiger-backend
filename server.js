@@ -62,7 +62,7 @@ db.connect((err) => {
 // CREATE DATABASE TABLES
 // ============================================
 function createTables() {
-    // Members table (includes role field for admin/instructor/member)
+    // Members table
     db.query(`
         CREATE TABLE IF NOT EXISTS members (
             id INT PRIMARY KEY AUTO_INCREMENT,
@@ -154,7 +154,7 @@ function createTables() {
             id INT PRIMARY KEY AUTO_INCREMENT,
             memberId INT NOT NULL,
             classDate DATE NOT NULL,
-            classType ENUM('little_tigers','junior','teen','adult','family') NOT NULL,
+            classType VARCHAR(50) NOT NULL,
             status ENUM('present','absent','makeup') DEFAULT 'present',
             checkInTime TIME,
             notes VARCHAR(255),
@@ -165,6 +165,40 @@ function createTables() {
     `, (err) => {
         if (err) console.error('Error creating attendance table:', err);
         else console.log('✅ Attendance table ready');
+    });
+
+    // Grades table
+    db.query(`
+        CREATE TABLE IF NOT EXISTS grades (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            studentId INT NOT NULL,
+            subject VARCHAR(50) NOT NULL,
+            score INT DEFAULT 0,
+            date DATE,
+            notes TEXT,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (studentId) REFERENCES members(id) ON DELETE CASCADE
+        )
+    `, (err) => {
+        if (err) console.error('Error creating grades table:', err);
+        else console.log('✅ Grades table ready');
+    });
+
+    // Observations table
+    db.query(`
+        CREATE TABLE IF NOT EXISTS observations (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            studentId INT NOT NULL,
+            instructorId INT NOT NULL,
+            note TEXT NOT NULL,
+            date DATE,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (studentId) REFERENCES members(id) ON DELETE CASCADE,
+            FOREIGN KEY (instructorId) REFERENCES members(id) ON DELETE CASCADE
+        )
+    `, (err) => {
+        if (err) console.error('Error creating observations table:', err);
+        else console.log('✅ Observations table ready');
     });
 }
 
@@ -512,9 +546,17 @@ app.get('/api/member/dashboard', authenticateToken, (req, res) => {
 // ADMIN ROUTES
 // ============================================
 
-// Get all members
+// Get all members (students)
 app.get('/api/admin/members', authenticateToken, requireAdmin, (req, res) => {
     db.query('SELECT id, name, email, phone, beltLevel, program, joinDate, isActive, role FROM members ORDER BY id DESC', (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Get all instructors
+app.get('/api/admin/instructors', authenticateToken, requireAdmin, (req, res) => {
+    db.query('SELECT id, name, email, phone, role FROM members WHERE role = "instructor" ORDER BY id DESC', (err, results) => {
         if (err) return res.status(500).json({ success: false, message: 'Database error' });
         res.json(results);
     });
@@ -528,6 +570,53 @@ app.get('/api/admin/members/:id', authenticateToken, requireAdmin, (req, res) =>
         delete results[0].password;
         res.json(results[0]);
     });
+});
+
+// Add new student (admin only)
+app.post('/api/admin/members', authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        const { name, email, phone, beltLevel, program, password } = req.body;
+        
+        // Check if email already exists
+        db.query('SELECT * FROM members WHERE email = ?', [email], async (err, results) => {
+            if (err) return res.status(500).json({ success: false, message: 'Database error' });
+            if (results.length > 0) {
+                return res.status(400).json({ success: false, message: 'Email already exists' });
+            }
+            
+            const hashedPassword = await bcrypt.hash(password || 'student123', 10);
+            const member = {
+                name,
+                email,
+                password: hashedPassword,
+                phone,
+                beltLevel: beltLevel || 'white',
+                program: program || 'Little Tigers',
+                role: 'member',
+                joinDate: moment().format('YYYY-MM-DD'),
+                isActive: true
+            };
+            
+            db.query('INSERT INTO members SET ?', member, (err, result) => {
+                if (err) return res.status(500).json({ success: false, message: 'Insert failed' });
+                
+                // Create belt progress record
+                const beltProgress = {
+                    memberId: result.insertId,
+                    currentBelt: beltLevel || 'white',
+                    requirementsCompleted: JSON.stringify({})
+                };
+                db.query('INSERT INTO belt_progress SET ?', beltProgress, (err) => {
+                    if (err) console.error('Error creating belt progress:', err);
+                });
+                
+                res.json({ success: true, id: result.insertId, message: 'Student added successfully' });
+            });
+        });
+    } catch (error) {
+        console.error('Add student error:', error);
+        res.status(500).json({ success: false, message: 'Failed to add student' });
+    }
 });
 
 // Update member
@@ -545,6 +634,14 @@ app.delete('/api/admin/members/:id', authenticateToken, requireAdmin, (req, res)
     db.query('DELETE FROM members WHERE id = ?', [req.params.id], (err) => {
         if (err) return res.status(500).json({ success: false, message: 'Delete failed' });
         res.json({ success: true, message: 'Member deleted' });
+    });
+});
+
+// Delete instructor
+app.delete('/api/admin/instructors/:id', authenticateToken, requireAdmin, (req, res) => {
+    db.query('DELETE FROM members WHERE id = ? AND role = "instructor"', [req.params.id], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Delete failed' });
+        res.json({ success: true, message: 'Instructor deleted' });
     });
 });
 
@@ -581,15 +678,16 @@ app.put('/api/admin/contacts/:id/read', authenticateToken, requireAdmin, (req, r
     });
 });
 
-// Get dashboard stats
+// Get dashboard stats (updated with instructors count)
 app.get('/api/admin/stats', authenticateToken, requireAdmin, (req, res) => {
     Promise.all([
-        new Promise((resolve) => db.query('SELECT COUNT(*) as total FROM members', (err, r) => resolve(r?.[0]?.total || 0))),
+        new Promise((resolve) => db.query('SELECT COUNT(*) as total FROM members WHERE role = "member"', (err, r) => resolve(r?.[0]?.total || 0))),
+        new Promise((resolve) => db.query('SELECT COUNT(*) as total FROM members WHERE role = "instructor"', (err, r) => resolve(r?.[0]?.total || 0))),
         new Promise((resolve) => db.query('SELECT COUNT(*) as total FROM payments WHERE status = "pending"', (err, r) => resolve(r?.[0]?.total || 0))),
         new Promise((resolve) => db.query('SELECT SUM(amount) as total FROM payments WHERE status = "completed"', (err, r) => resolve(r?.[0]?.total || 0))),
         new Promise((resolve) => db.query('SELECT COUNT(*) as total FROM contacts WHERE status = "new"', (err, r) => resolve(r?.[0]?.total || 0)))
-    ]).then(([totalMembers, pendingPayments, totalRevenue, unreadMessages]) => {
-        res.json({ totalMembers, pendingPayments, totalRevenue, unreadMessages });
+    ]).then(([totalMembers, totalInstructors, pendingPayments, totalRevenue, unreadMessages]) => {
+        res.json({ totalMembers, totalInstructors, pendingPayments, totalRevenue, unreadMessages });
     });
 });
 
@@ -602,10 +700,10 @@ app.get('/api/instructor/students', authenticateToken, requireInstructor, (req, 
     const classType = req.query.class;
     let classCondition = '';
     
-    if (classType === 'little_tigers') classCondition = 'program = "Little Tigers"';
-    else if (classType === 'junior') classCondition = 'program = "Junior Program"';
-    else if (classType === 'teen_adult') classCondition = 'program = "Teen/Adult Program"';
-    else if (classType === 'family') classCondition = 'program = "Family Classes"';
+    if (classType === 'Little Tigers') classCondition = 'program = "Little Tigers"';
+    else if (classType === 'Junior Program') classCondition = 'program = "Junior Program"';
+    else if (classType === 'Teen/Adult Program') classCondition = 'program = "Teen/Adult Program"';
+    else if (classType === 'Family Classes') classCondition = 'program = "Family Classes"';
     
     let query = 'SELECT id, name, email, phone, beltLevel, joinDate, program FROM members WHERE role = "member"';
     if (classCondition) query += ' AND ' + classCondition;
@@ -636,8 +734,8 @@ app.post('/api/instructor/attendance', authenticateToken, requireInstructor, (re
         status: status || 'present'
     };
     
-    db.query('INSERT INTO attendance SET ? ON DUPLICATE KEY UPDATE status = ?, notes = ?', 
-        [attendance, status, attendance.notes], (err) => {
+    db.query('INSERT INTO attendance SET ? ON DUPLICATE KEY UPDATE status = ?', 
+        [attendance, status], (err) => {
         if (err) return res.status(500).json({ success: false, message: 'Failed to mark attendance' });
         res.json({ success: true, message: 'Attendance recorded' });
     });
@@ -682,7 +780,64 @@ app.put('/api/instructor/student/:id/belt', authenticateToken, requireInstructor
     });
 });
 
-// Add instructor note for student
+// Add grade for student
+app.post('/api/instructor/grade', authenticateToken, requireInstructor, (req, res) => {
+    const { studentId, subject, score, notes } = req.body;
+    
+    const grade = {
+        studentId,
+        subject,
+        score,
+        notes,
+        date: moment().format('YYYY-MM-DD')
+    };
+    
+    db.query('INSERT INTO grades SET ?', grade, (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Failed to save grade' });
+        res.json({ success: true, message: 'Grade saved successfully' });
+    });
+});
+
+// Get grades for a student
+app.get('/api/instructor/grades/:studentId', authenticateToken, requireInstructor, (req, res) => {
+    db.query('SELECT * FROM grades WHERE studentId = ? ORDER BY date DESC', [req.params.studentId], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Add observation for student
+app.post('/api/instructor/observation', authenticateToken, requireInstructor, (req, res) => {
+    const { studentId, note } = req.body;
+    
+    const observation = {
+        studentId,
+        instructorId: req.user.id,
+        note,
+        date: moment().format('YYYY-MM-DD')
+    };
+    
+    db.query('INSERT INTO observations SET ?', observation, (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Failed to save observation' });
+        res.json({ success: true, message: 'Observation added' });
+    });
+});
+
+// Get observations for a student
+app.get('/api/instructor/observations/:studentId', authenticateToken, requireInstructor, (req, res) => {
+    db.query(`
+        SELECT o.*, m.name as instructorName 
+        FROM observations o 
+        JOIN members m ON o.instructorId = m.id 
+        WHERE o.studentId = ? 
+        ORDER BY o.date DESC
+    `, [req.params.studentId], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json(results);
+    });
+});
+
+// Add instructor note for student (legacy)
 app.post('/api/instructor/student/:id/note', authenticateToken, requireInstructor, (req, res) => {
     const { note } = req.body;
     db.query('UPDATE belt_progress SET instructorNotes = ? WHERE memberId = ?', [note, req.params.id], (err) => {
