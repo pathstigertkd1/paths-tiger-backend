@@ -27,10 +27,15 @@
 <body class="bg-gray-50">
 
     <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         
+        console.log('Token exists:', !!token);
+        console.log('User:', user);
+        
         if (!token) {
+            console.log('No token, redirecting to login');
             window.location.href = 'login.html';
         }
         
@@ -50,26 +55,52 @@
         }
 
         async function loadDashboard() {
+            const loadingSpinner = document.querySelector('.loading-spinner');
+            const dashboardContent = document.querySelector('.dashboard-content');
+            const errorDiv = document.querySelector('.dashboard-error');
+            const errorText = document.querySelector('.error-text');
+            
             try {
-                const response = await fetch('http://localhost:5000/api/member/dashboard', {
+                console.log('Fetching dashboard from:', `${API_BASE_URL}/member/dashboard`);
+                
+                const response = await fetch(`${API_BASE_URL}/member/dashboard`, {
+                    method: 'GET',
                     headers: {
-                        'Authorization': 'Bearer ' + token
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
                     }
                 });
                 
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        console.log('Token invalid or expired');
+                        alert('Session expired. Please login again.');
+                        logout();
+                        return;
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
+                console.log('Dashboard data received:', data);
                 
                 if (data.success) {
                     updateDashboard(data.dashboard);
+                    loadingSpinner.classList.add('hidden');
+                    dashboardContent.classList.remove('hidden');
                 } else {
-                    console.error('Failed to load dashboard:', data.message);
-                    if (data.message.includes('token') || data.message.includes('authenticate')) {
-                        logout();
-                    }
+                    throw new Error(data.message || 'Failed to load dashboard');
                 }
+                
             } catch (error) {
-                console.error('Error loading dashboard:', error);
-                document.querySelector('.dashboard-error').classList.remove('hidden');
+                console.error('Dashboard error:', error);
+                loadingSpinner.classList.add('hidden');
+                if (errorText) {
+                    errorText.textContent = error.message || 'Could not connect to the server. Make sure the backend is running.';
+                }
+                errorDiv.classList.remove('hidden');
             }
         }
 
@@ -135,9 +166,6 @@
                     </div>
                 `).join('');
             }
-
-            document.querySelector('.loading-spinner').classList.add('hidden');
-            document.querySelector('.dashboard-content').classList.remove('hidden');
         }
     </script>
 
@@ -150,14 +178,19 @@
     </div>
 
     <!-- Error Message - FIXED (added hidden class) -->
-    <div class="dashboard-error  fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
-        <div class="text-center bg-white p-8 rounded-2xl shadow-xl">
+    <div class="dashboard-error hidden fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+        <div class="text-center bg-white p-8 rounded-2xl shadow-xl max-w-md">
             <div class="text-6xl mb-4">😟</div>
             <h2 class="text-2xl font-bold mb-4">Something went wrong</h2>
-            <p class="text-gray-600 mb-6">Could not load your dashboard. Please try again.</p>
-            <button onclick="location.reload()" class="bg-orange-600 text-white px-6 py-2 rounded-full hover:bg-orange-700">
-                Retry
-            </button>
+            <p class="text-gray-600 mb-6 error-text">Could not load your dashboard. Please try again.</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="location.reload()" class="bg-orange-600 text-white px-6 py-2 rounded-full hover:bg-orange-700">
+                    Retry
+                </button>
+                <button onclick="logout()" class="bg-gray-500 text-white px-6 py-2 rounded-full hover:bg-gray-600">
+                    Back to Login
+                </button>
+            </div>
         </div>
     </div>
 
