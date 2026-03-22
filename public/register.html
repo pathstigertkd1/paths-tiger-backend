@@ -36,6 +36,13 @@
             height: 4px;
             transition: all 0.3s ease;
         }
+        .program-card {
+            transition: all 0.3s ease;
+        }
+        .program-card.selected {
+            border-color: #F97316;
+            background-color: #FEF3C7;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -58,21 +65,26 @@
                         <li><a href="schedule.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded">Schedule</a></li>
                     </ul>
                 </div>
-                <a href="login.html" class="text-white px-4 py-2 hover:bg-purple-950 transition bg-amber-950 rounded-2xl">Member Login</a>
+                <div class="flex items-center space-x-3">
+                    <a href="login.html" class="text-white px-3 py-2 hover:bg-purple-950 bg-amber-950 rounded-2xl text-sm">Member</a>
+                    <a href="instructor-login.html" class="text-white px-3 py-2 hover:bg-purple-950 bg-amber-950 rounded-2xl text-sm">👨‍🏫 Instructor</a>
+                    <a href="admin-login.html" class="text-white px-3 py-2 hover:bg-purple-950 bg-amber-950 rounded-2xl text-sm">👑 Admin</a>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Registration Form -->
     <div class="min-h-screen flex items-center justify-center py-12 px-4">
-        <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8">
+        <div class="max-w-3xl w-full bg-white rounded-2xl shadow-xl p-8">
             <div class="text-center mb-8">
                 <span class="text-6xl">🥋</span>
                 <h2 class="text-3xl font-bold mt-4">Become a Member</h2>
                 <p class="text-gray-600">Join the Paths Tiger family today!</p>
+                <p class="text-sm text-orange-600 mt-2">Monday - Friday: 4PM - 9PM | Saturday & Sunday: Closed</p>
             </div>
 
-            <!-- Success Message (hidden by default) -->
+            <!-- Success Message -->
             <div id="successMessage" class="hidden success-animation mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
                 <div class="flex items-center">
                     <span class="text-2xl mr-3">✅</span>
@@ -83,7 +95,7 @@
                 </div>
             </div>
 
-            <!-- Error Message (hidden by default) -->
+            <!-- Error Message -->
             <div id="errorMessage" class="hidden mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                 <div class="flex items-center">
                     <span class="text-2xl mr-3">❌</span>
@@ -119,8 +131,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Date of Birth</label>
-                    <input type="date" id="dateOfBirth" 
+                    <label class="block text-sm font-medium mb-2">Date of Birth *</label>
+                    <input type="date" id="dateOfBirth" required 
                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
                 </div>
 
@@ -131,35 +143,91 @@
                            placeholder="Your residential address">
                 </div>
 
-                <!-- Program Selection -->
-                <div>
-                    <label class="block text-sm font-medium mb-2">Select Program *</label>
-                    <select id="program" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
-                        <option value="">Choose a program...</option>
-                        <option value="Little Tigers">Little Tigers (Ages 3-5)</option>
-                        <option value="Junior Program">Junior Program (Ages 6-12)</option>
-                        <option value="Teen/Adult Program">Teen/Adult Program (Ages 13+)</option>
-                        <option value="Family Classes">Family Classes</option>
-                    </select>
+                <!-- Age Group Selection (Auto-calculated from DOB) -->
+                <div id="ageGroupDisplay" class="hidden p-3 bg-orange-50 rounded-lg">
+                    <p class="text-sm"><span class="font-semibold">Age Group:</span> <span id="ageGroupText"></span></p>
+                    <p class="text-xs text-gray-600 mt-1">Based on your date of birth</p>
                 </div>
 
-                <!-- Membership Plan - FIXED -->
+                <!-- Program Selection - Updated with all disciplines -->
                 <div>
-                    <label class="block text-sm font-medium mb-3">Membership Plan *</label>
-                    <div class="grid md:grid-cols-3 gap-3">
-                        <label class="border rounded-lg p-4 cursor-pointer hover:border-orange-600 transition">
-                            <input type="radio" name="plan" value="Basic" class="mr-2" checked> Basic
-                            <p class="text-sm text-gray-600">Rs. 7,900/month</p>
-                        </label>
-                        <label class="border rounded-lg p-4 cursor-pointer hover:border-orange-600 transition">
-                            <input type="radio" name="plan" value="Family" class="mr-2"> Family
-                            <p class="text-sm text-gray-600">Rs. 14,900/month</p>
-                        </label>
-                        <label class="border rounded-lg p-4 cursor-pointer hover:border-orange-600 transition">
-                            <input type="radio" name="plan" value="Premium" class="mr-2"> Premium
-                            <p class="text-sm text-gray-600">Rs. 12,900/month</p>
-                        </label>
+                    <label class="block text-sm font-medium mb-3">Select Program *</label>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <!-- Taekwondo -->
+                        <div onclick="selectProgram('Taekwondo', 'little_tigers')" id="prog-tkd" class="program-card border rounded-lg p-3 cursor-pointer hover:border-orange-600 transition">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl">🥋</span>
+                                <div>
+                                    <p class="font-semibold">Taekwondo</p>
+                                    <p class="text-xs text-gray-500">Traditional Korean Martial Art</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Boxing -->
+                        <div onclick="selectProgram('Boxing', 'little_tigers')" id="prog-boxing" class="program-card border rounded-lg p-3 cursor-pointer hover:border-orange-600 transition">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl">🥊</span>
+                                <div>
+                                    <p class="font-semibold">Boxing</p>
+                                    <p class="text-xs text-gray-500">Strike & Defend</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Gymnastics -->
+                        <div onclick="selectProgram('Gymnastics', 'little_tigers')" id="prog-gym" class="program-card border rounded-lg p-3 cursor-pointer hover:border-orange-600 transition">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl">🤸‍♀️</span>
+                                <div>
+                                    <p class="font-semibold">Gymnastics</p>
+                                    <p class="text-xs text-gray-500">Flexibility & Strength</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Fitness -->
+                        <div onclick="selectProgram('Fitness', 'little_tigers')" id="prog-fitness" class="program-card border rounded-lg p-3 cursor-pointer hover:border-orange-600 transition">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl">🏋️‍♂️</span>
+                                <div>
+                                    <p class="font-semibold">Fitness</p>
+                                    <p class="text-xs text-gray-500">Health & Wellness</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- MMA -->
+                        <div onclick="selectProgram('MMA', 'little_tigers')" id="prog-mma" class="program-card border rounded-lg p-3 cursor-pointer hover:border-orange-600 transition">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl">💪</span>
+                                <div>
+                                    <p class="font-semibold">Mixed Martial Arts</p>
+                                    <p class="text-xs text-gray-500">Complete Fighting System</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Family -->
+                        <div onclick="selectProgram('Family Classes', 'family')" id="prog-family" class="program-card border rounded-lg p-3 cursor-pointer hover:border-orange-600 transition">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl">👨‍👩‍👧‍👦</span>
+                                <div>
+                                    <p class="font-semibold">Family Classes</p>
+                                    <p class="text-xs text-gray-500">Train together, grow together</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <input type="hidden" id="selectedProgram" required>
+                    <input type="hidden" id="selectedAgeGroup" required>
+                </div>
+
+                <!-- Age Group-specific Class Info -->
+                <div id="classInfo" class="hidden bg-blue-50 p-4 rounded-lg">
+                    <p class="text-sm font-semibold text-blue-800">📅 Your Class Schedule:</p>
+                    <p id="classTimeInfo" class="text-sm text-blue-700 mt-1"></p>
+                    <p id="classDaysInfo" class="text-xs text-blue-600 mt-1"></p>
                 </div>
 
                 <!-- Create Password -->
@@ -203,9 +271,17 @@
                 <p class="text-sm text-gray-600">Already have an account? <a href="login.html" class="text-orange-600 hover:underline font-semibold">Login here</a></p>
             </div>
 
-            <div class="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-gray-600">
-                <p class="font-semibold mb-1">📝 Note:</p>
-                <p>After registration, you'll receive a welcome email and can login immediately.</p>
+            <!-- Schedule Info -->
+            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                <p class="text-xs font-semibold text-gray-700 mb-1">📌 Class Schedule:</p>
+                <div class="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                    <div>🐯 Little Tigers (3-5): 4:00 PM</div>
+                    <div>⭐ Junior (6-12): 5:00 PM</div>
+                    <div>💪 Teen/Adult (13-49): 6:00 PM</div>
+                    <div>👴 Senior (50+): 7:00 PM</div>
+                    <div>👨‍👩‍👧‍👦 Family: 8:00 PM</div>
+                    <div class="col-span-2 text-center text-orange-600">Monday - Friday Only</div>
+                </div>
             </div>
         </div>
     </div>
@@ -228,16 +304,132 @@
                 </div>
             </div>
             <div class="text-center text-sm text-gray-400 mt-4 pt-4 border-t border-gray-800">
-                <p>🏪 Open: Monday-Friday 3PM-8PM | Saturday 9AM-1PM | Sunday Closed</p>
+                <p>🏪 Open: Monday-Friday 4PM-9PM | Saturday & Sunday Closed</p>
                 <p class="mt-2">📍 Hospital Road, Manga Mandi Lahore | 📞 <a href="tel:03174084613" class="hover:text-white">0317-4084613</a></p>
             </div>
         </div>
     </footer>
 
-    <!-- Registration Script -->
     <script>
         const API_BASE_URL = 'http://localhost:5000/api';
-
+        
+        let selectedDiscipline = '';
+        let selectedAgeGroup = '';
+        
+        // Calculate age from date of birth
+        function calculateAge(dateOfBirth) {
+            const today = new Date();
+            const birthDate = new Date(dateOfBirth);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+        
+        // Determine age group based on age
+        function getAgeGroup(age) {
+            if (age >= 3 && age <= 5) return 'little_tigers';
+            if (age >= 6 && age <= 12) return 'junior';
+            if (age >= 13 && age <= 49) return 'teen_adult';
+            if (age >= 50) return 'senior';
+            return null;
+        }
+        
+        // Get class time based on age group
+        function getClassTime(ageGroup) {
+            const times = {
+                'little_tigers': '4:00 PM - 5:00 PM',
+                'junior': '5:00 PM - 6:00 PM',
+                'teen_adult': '6:00 PM - 7:00 PM',
+                'senior': '7:00 PM - 8:00 PM',
+                'family': '8:00 PM - 9:00 PM'
+            };
+            return times[ageGroup] || 'Contact us for schedule';
+        }
+        
+        // Get discipline schedule
+        function getDisciplineSchedule(discipline) {
+            const days = {
+                'Taekwondo': 'Monday',
+                'Boxing': 'Tuesday',
+                'Gymnastics': 'Wednesday',
+                'Fitness': 'Thursday',
+                'MMA': 'Friday',
+                'Family Classes': 'Monday - Friday (All disciplines rotate)'
+            };
+            return days[discipline] || 'Contact for schedule';
+        }
+        
+        // Update class info display
+        function updateClassInfo() {
+            if (selectedAgeGroup && selectedDiscipline) {
+                const classTime = getClassTime(selectedAgeGroup);
+                const disciplineDay = getDisciplineSchedule(selectedDiscipline);
+                document.getElementById('classTimeInfo').innerHTML = `⏰ ${classTime} - ${selectedDiscipline}`;
+                document.getElementById('classDaysInfo').innerHTML = `📅 ${disciplineDay}`;
+                document.getElementById('classInfo').classList.remove('hidden');
+            } else if (selectedAgeGroup) {
+                const classTime = getClassTime(selectedAgeGroup);
+                document.getElementById('classTimeInfo').innerHTML = `⏰ ${classTime}`;
+                document.getElementById('classDaysInfo').innerHTML = `📅 Select a discipline to see specific days`;
+                document.getElementById('classInfo').classList.remove('hidden');
+            }
+        }
+        
+        // Select program
+        function selectProgram(discipline, ageGroup) {
+            selectedDiscipline = discipline;
+            selectedAgeGroup = ageGroup;
+            
+            // Reset all program cards
+            document.querySelectorAll('.program-card').forEach(card => {
+                card.classList.remove('selected', 'border-orange-600', 'bg-orange-50');
+                card.classList.add('border-gray-300');
+            });
+            
+            // Highlight selected
+            const progId = `prog-${discipline.toLowerCase().replace(' ', '-')}`;
+            const selectedCard = document.getElementById(progId);
+            if (selectedCard) {
+                selectedCard.classList.add('selected', 'border-orange-600', 'bg-orange-50');
+                selectedCard.classList.remove('border-gray-300');
+            }
+            
+            document.getElementById('selectedProgram').value = discipline;
+            document.getElementById('selectedAgeGroup').value = ageGroup;
+            
+            updateClassInfo();
+        }
+        
+        // Date of birth change handler
+        document.getElementById('dateOfBirth').addEventListener('change', function() {
+            const dob = this.value;
+            if (dob) {
+                const age = calculateAge(dob);
+                const ageGroup = getAgeGroup(age);
+                
+                if (ageGroup) {
+                    let groupText = '';
+                    if (ageGroup === 'little_tigers') groupText = 'Little Tigers (3-5 years) - 4:00 PM Class';
+                    else if (ageGroup === 'junior') groupText = 'Junior Program (6-12 years) - 5:00 PM Class';
+                    else if (ageGroup === 'teen_adult') groupText = 'Teen & Adult (13-49 years) - 6:00 PM Class';
+                    else if (ageGroup === 'senior') groupText = 'Senior Citizens (50+ years) - 7:00 PM Class';
+                    
+                    document.getElementById('ageGroupText').innerHTML = `${groupText} (Age: ${age} years)`;
+                    document.getElementById('ageGroupDisplay').classList.remove('hidden');
+                    selectedAgeGroup = ageGroup;
+                    updateClassInfo();
+                } else {
+                    document.getElementById('ageGroupDisplay').classList.add('hidden');
+                    alert('Age must be 3 years or above to register');
+                    this.value = '';
+                }
+            }
+        });
+        
+        // Password strength checker
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirmPassword');
         const passwordStrength = document.getElementById('passwordStrength');
@@ -295,6 +487,7 @@
             }
         }
 
+        // Form submission
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -305,7 +498,18 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
             const dateOfBirth = document.getElementById('dateOfBirth').value;
             const address = document.getElementById('address').value;
-            const program = document.getElementById('program').value;
+            const program = document.getElementById('selectedProgram').value;
+            const ageGroup = document.getElementById('selectedAgeGroup').value;
+            
+            if (!program) {
+                showError('Please select a program');
+                return;
+            }
+            
+            if (!dateOfBirth) {
+                showError('Please enter your date of birth');
+                return;
+            }
             
             if (password !== confirmPassword) {
                 showError('Passwords do not match');
@@ -317,16 +521,10 @@
                 return;
             }
             
-            if (!program) {
-                showError('Please select a program');
-                return;
-            }
-            
             const submitButton = document.getElementById('submitButton');
             const buttonText = document.getElementById('buttonText');
             const successMessage = document.getElementById('successMessage');
             const errorMessage = document.getElementById('errorMessage');
-            const errorText = document.getElementById('errorText');
             
             successMessage.classList.add('hidden');
             errorMessage.classList.add('hidden');
@@ -337,12 +535,8 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/auth/register`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name, email, password, phone, address, dateOfBirth
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, phone, address, dateOfBirth, program, ageGroup })
                 });
                 
                 const data = await response.json();
@@ -351,18 +545,19 @@
                     successMessage.classList.remove('hidden');
                     document.getElementById('registerForm').reset();
                     passwordStrength.style.width = '0%';
+                    document.querySelectorAll('.program-card').forEach(c => c.classList.remove('selected', 'border-orange-600', 'bg-orange-50'));
+                    document.getElementById('ageGroupDisplay').classList.add('hidden');
+                    document.getElementById('classInfo').classList.add('hidden');
                     successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 2000);
-                    
                 } else {
                     showError(data.message || 'Registration failed. Please try again.');
                     submitButton.disabled = false;
                     buttonText.textContent = 'Create Account';
                 }
-                
             } catch (error) {
                 console.error('Registration error:', error);
                 showError('Connection error. Please make sure the backend server is running at ' + API_BASE_URL);
@@ -377,22 +572,16 @@
             errorText.textContent = message;
             errorMessage.classList.remove('hidden');
             errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            setTimeout(() => {
-                errorMessage.classList.add('hidden');
-            }, 5000);
+            setTimeout(() => { errorMessage.classList.add('hidden'); }, 5000);
         }
-
+        
+        // Phone number formatting
         document.getElementById('phone').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 0) {
-                if (value.length <= 4) {
-                    value = value;
-                } else if (value.length <= 7) {
-                    value = value.slice(0,4) + '-' + value.slice(4);
-                } else {
-                    value = value.slice(0,4) + '-' + value.slice(4,7) + '-' + value.slice(7,11);
-                }
+                if (value.length <= 4) value = value;
+                else if (value.length <= 7) value = value.slice(0,4) + '-' + value.slice(4);
+                else value = value.slice(0,4) + '-' + value.slice(4,7) + '-' + value.slice(7,11);
                 e.target.value = value;
             }
         });
