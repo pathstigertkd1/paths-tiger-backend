@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Schedule - Paths Tiger Taekwondo Academy</title>
+    <title>Class Schedule - Paths Tiger Taekwondo Academy</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .schedule-table th, .schedule-table td { padding: 12px; text-align: center; }
+        .class-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 20px; display: inline-block; margin-top: 4px; }
+        .age-badge { font-size: 0.65rem; padding: 2px 8px; border-radius: 20px; background-color: #FEF3C7; color: #F97316; display: inline-block; margin-left: 5px; }
+        .filter-btn.active { background-color: #F97316; color: white; }
+        .filter-btn:hover { background-color: #F97316; color: white; }
+        .time-slot-header { background-color: #F97316; color: white; font-weight: bold; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -32,97 +36,283 @@
                         <li><a href="schedule.html" class="cursor-pointer px-2 py-2 text-white hover:bg-amber-500 rounded bg-amber-600">Schedule</a></li>
                     </ul>
                 </div>
-                <a href="login.html" class="text-white px-4 py-2 hover:bg-purple-950 transition bg-amber-950 rounded-2xl">
-                    Login
-                </a>
+                <div class="flex items-center space-x-3">
+                    <a href="login.html" class="text-white px-3 py-2 hover:bg-purple-950 bg-amber-950 rounded-2xl text-sm">Member</a>
+                    <a href="instructor-login.html" class="text-white px-3 py-2 hover:bg-purple-950 bg-amber-950 rounded-2xl text-sm">👨‍🏫 Instructor</a>
+                    <a href="admin-login.html" class="text-white px-3 py-2 hover:bg-purple-950 bg-amber-950 rounded-2xl text-sm">👑 Admin</a>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Page Header -->
-    <div class="bg-orange-500 text-white py-16">
+    <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-16">
         <div class="max-w-7xl mx-auto text-center px-4">
             <h1 class="text-5xl font-black mb-4">Class <span class="text-black">Schedule</span></h1>
-            <p class="text-xl max-w-3xl mx-auto">Find the perfect class time for your family</p>
+            <p class="text-xl max-w-3xl mx-auto">Find the perfect class time for your age group and discipline</p>
+            <div class="mt-4 inline-block bg-black bg-opacity-20 px-4 py-2 rounded-full">
+                <span class="text-sm">⏰ Monday - Friday: 4:00 PM - 9:00 PM | Saturday & Sunday: Closed</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Age Group Legend -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="bg-gray-100 rounded-xl p-4">
+            <h3 class="font-bold mb-3 text-center">📌 Class Schedule by Age Group</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-center">
+                <div class="bg-orange-100 p-2 rounded-lg">
+                    <span class="font-bold text-orange-700">🐯 4:00 PM - 5:00 PM</span>
+                    <p class="text-sm">Little Tigers (Ages 3-5) & Junior (Ages 6-12)</p>
+                </div>
+                <div class="bg-blue-100 p-2 rounded-lg">
+                    <span class="font-bold text-blue-700">💪 6:00 PM - 7:00 PM</span>
+                    <p class="text-sm">Teen & Adult (Ages 13+) / Senior (Ages 50+)</p>
+                </div>
+                <div class="bg-purple-100 p-2 rounded-lg">
+                    <span class="font-bold text-purple-700">👨‍👩‍👧‍👦 8:00 PM - 9:00 PM</span>
+                    <p class="text-sm">Family Classes (All Ages)</p>
+                </div>
+                <div class="bg-green-100 p-2 rounded-lg">
+                    <span class="font-bold text-green-700">📅 Saturday & Sunday</span>
+                    <p class="text-sm">Academy Closed</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Filter Buttons -->
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex flex-wrap gap-2 justify-center">
-            <button onclick="filterClasses('all')" class="px-4 py-2 bg-orange-600 text-white rounded-full">All Classes</button>
-            <button onclick="filterClasses('Little Tigers')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full">Little Tigers</button>
-            <button onclick="filterClasses('Junior')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full">Junior</button>
-            <button onclick="filterClasses('Teen/Adult')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full">Teen/Adult</button>
-            <button onclick="filterClasses('Family')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full">Family</button>
+            <button onclick="filterSchedule('all')" class="filter-btn px-4 py-2 bg-orange-600 text-white rounded-full active" data-filter="all">All Classes</button>
+            <button onclick="filterSchedule('taekwondo')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="taekwondo">🥋 Taekwondo</button>
+            <button onclick="filterSchedule('boxing')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="boxing">🥊 Boxing</button>
+            <button onclick="filterSchedule('gymnastics')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="gymnastics">🤸 Gymnastics</button>
+            <button onclick="filterSchedule('fitness')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="fitness">🏋️ Fitness</button>
+            <button onclick="filterSchedule('mma')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="mma">💪 MMA</button>
+            <button onclick="filterSchedule('family')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="family">👨‍👩‍👧‍👦 Family</button>
         </div>
     </div>
 
     <!-- Schedule Table -->
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <table class="w-full">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden overflow-x-auto">
+            <table class="schedule-table w-full min-w-[800px]">
                 <thead class="bg-orange-600 text-white">
-                    <tr>
-                        <th class="p-4 text-left">Time</th>
+                     <tr>
+                        <th class="p-4 text-left">Time / Day</th>
                         <th class="p-4">Monday</th>
                         <th class="p-4">Tuesday</th>
                         <th class="p-4">Wednesday</th>
                         <th class="p-4">Thursday</th>
                         <th class="p-4">Friday</th>
-                        <th class="p-4">Saturday</th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
-                    <!-- 4:00 PM -->
-                    <tr class="border-b">
-                        <td class="p-4 font-bold text-left">4:00 To 4:40 PM</td>
-                        <td class="p-4 bg-orange-50">Little Tigers<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
-                        <td class="p-4 bg-green-50">Little Tigers<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
-                        <td class="p-4 bg-orange-50">Little Tigers<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
-                        <td class="p-4 bg-green-50">Little Tigers<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
-                        <td class="p-4 bg-blue-50">Little Tigers<br><span class="text-xs text-gray-500"> Ages 3-5</span></td>
-                        <td class="p-4">-</td>
+                    
+                    <!-- 4:00 PM - Little Tigers & Junior -->
+                    <tr class="border-b bg-orange-50">
+                        <td class="p-4 font-bold text-left bg-orange-100">
+                            4:00 PM - 5:00 PM
+                            <div class="text-xs text-gray-600">Little Tigers & Junior</div>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="taekwondo">
+                            🥋 Taekwondo<br>
+                            <span class="class-tag bg-orange-100 text-orange-700">Little Tigers (3-5)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="boxing">
+                            🥊 Boxing<br>
+                            <span class="class-tag bg-red-100 text-red-700">Little Tigers (3-5)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="gymnastics">
+                            🤸 Gymnastics<br>
+                            <span class="class-tag bg-green-100 text-green-700">Little Tigers (3-5)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="fitness">
+                            🏋️ Fitness<br>
+                            <span class="class-tag bg-purple-100 text-purple-700">Little Tigers (3-5)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="mma">
+                            💪 MMA<br>
+                            <span class="class-tag bg-gray-600 text-white">Little Tigers (3-5)</span>
+                        </td>
                     </tr>
-                    <!-- 5:00 PM -->
-                     <tr class="border-b">
-                        <td class="p-4 font-bold text-left">5:00 To 5:40 PM</td>
-                        <td class="p-4 bg-orange-50">Juniors<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
-                        <td class="p-4 bg-green-50">Juniors<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
-                        <td class="p-4 bg-orange-50">Juniors<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
-                        <td class="p-4 bg-green-50">Juniors<br><span class="text-xs text-gray-500">Ages 3-5</span></td>
-                        <td class="p-4 bg-blue-50">Juniors<br><span class="text-xs text-gray-500"> Ages 3-5</span></td>
-                        <td class="p-4">-</td>
+                    
+                    <!-- 5:00 PM - Junior Program -->
+                    <tr class="border-b bg-yellow-50">
+                        <td class="p-4 font-bold text-left bg-yellow-100">
+                            5:00 PM - 6:00 PM
+                            <div class="text-xs text-gray-600">Junior Program</div>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="taekwondo">
+                            🥋 Taekwondo<br>
+                            <span class="class-tag bg-orange-100 text-orange-700">Junior (6-12)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="boxing">
+                            🥊 Boxing<br>
+                            <span class="class-tag bg-red-100 text-red-700">Junior (6-12)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="gymnastics">
+                            🤸 Gymnastics<br>
+                            <span class="class-tag bg-green-100 text-green-700">Junior (6-12)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="fitness">
+                            🏋️ Fitness<br>
+                            <span class="class-tag bg-purple-100 text-purple-700">Junior (6-12)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="mma">
+                            💪 MMA<br>
+                            <span class="class-tag bg-gray-600 text-white">Junior (6-12)</span>
+                        </td>
                     </tr>
-                    <!-- 6:00 PM -->
-                    <tr class="border-b">
-                        <td class="p-4 font-bold text-left">6:00 To 8:00 PM</td>
-                        <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 16+</span></td>
-                        <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 16+</span></td>
-                        <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 16+</span></td>
-                        <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 16+</span></td>
-                       <td class="p-4 bg-purple-50">Teen/Adult<br><span class="text-xs text-gray-500">Ages 16+</span></td>
-
-                        <td class="p-4">-</td>
-                        <td class="p-4">-</td>
+                    
+                    <!-- 6:00 PM - Teen & Adult -->
+                    <tr class="border-b bg-blue-50">
+                        <td class="p-4 font-bold text-left bg-blue-100">
+                            6:00 PM - 7:00 PM
+                            <div class="text-xs text-gray-600">Teen & Adult (13-49)</div>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="taekwondo">
+                            🥋 Taekwondo<br>
+                            <span class="class-tag bg-orange-100 text-orange-700">Teen/Adult (13+)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="boxing">
+                            🥊 Boxing<br>
+                            <span class="class-tag bg-red-100 text-red-700">Teen/Adult (13+)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="gymnastics">
+                            🤸 Gymnastics<br>
+                            <span class="class-tag bg-green-100 text-green-700">Teen/Adult (13+)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="fitness">
+                            🏋️ Fitness<br>
+                            <span class="class-tag bg-purple-100 text-purple-700">Teen/Adult (13+)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="mma">
+                            💪 MMA<br>
+                            <span class="class-tag bg-gray-600 text-white">Teen/Adult (13+)</span>
+                        </td>
                     </tr>
-                    <!-- 10:00 AM Saturday -->
-                     <tr class="border-b">
-                        <td class="p-4 font-bold text-left">8:00 To 10:00 PM</td>
-                        <td class="p-4 bg-purple-50">Family<br><span class="text-xs text-gray-500">All Ages</span></td>
-                        <td class="p-4 bg-purple-50">Family<br><span class="text-xs text-gray-500">All Ages</span></td>
-                        <td class="p-4 bg-purple-50">Family<br><span class="text-xs text-gray-500">All Ages</span></td>
-                        <td class="p-4 bg-purple-50">Family<br><span class="text-xs text-gray-500">All Ages</span></td>
-                         <td class="p-4 bg-purple-50">Family<br><span class="text-xs text-gray-500">All Ages</span></td>
-  
-                        <td class="p-4">-</td>
-                        <td class="p-4">-</td>
+                    
+                    <!-- 7:00 PM - Senior Citizens -->
+                    <tr class="border-b bg-green-50">
+                        <td class="p-4 font-bold text-left bg-green-100">
+                            7:00 PM - 8:00 PM
+                            <div class="text-xs text-gray-600">Senior Citizens (50+)</div>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="taekwondo">
+                            🥋 Taekwondo<br>
+                            <span class="class-tag bg-orange-100 text-orange-700">Senior (50+)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="boxing">
+                            🥊 Boxing<br>
+                            <span class="class-tag bg-red-100 text-red-700">Senior (50+)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="gymnastics">
+                            🤸 Gymnastics<br>
+                            <span class="class-tag bg-green-100 text-green-700">Senior (50+)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="fitness">
+                            🏋️ Fitness<br>
+                            <span class="class-tag bg-purple-100 text-purple-700">Senior (50+)</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="mma">
+                            💪 MMA<br>
+                            <span class="class-tag bg-gray-600 text-white">Senior (50+)</span>
+                        </td>
                     </tr>
-                   
+                    
+                    <!-- 8:00 PM - Family Classes -->
+                    <tr class="border-b bg-purple-50">
+                        <td class="p-4 font-bold text-left bg-purple-100">
+                            8:00 PM - 9:00 PM
+                            <div class="text-xs text-gray-600">Family Classes</div>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="family">
+                            👨‍👩‍👧‍👦 Family Taekwondo<br>
+                            <span class="class-tag bg-blue-100 text-blue-700">All Ages Together</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="family">
+                            👨‍👩‍👧‍👦 Family Boxing<br>
+                            <span class="class-tag bg-blue-100 text-blue-700">All Ages Together</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="family">
+                            👨‍👩‍👧‍👦 Family Gymnastics<br>
+                            <span class="class-tag bg-blue-100 text-blue-700">All Ages Together</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="family">
+                            👨‍👩‍👧‍👦 Family Fitness<br>
+                            <span class="class-tag bg-blue-100 text-blue-700">All Ages Together</span>
+                        </td>
+                        <td class="p-4 schedule-item" data-category="family">
+                            👨‍👩‍👧‍👦 Family MMA<br>
+                            <span class="class-tag bg-blue-100 text-blue-700">All Ages Together</span>
+                        </td>
+                    </tr>
+                    
                 </tbody>
             </table>
         </div>
-        <p class="text-sm text-gray-500 mt-4 text-center">All classes are 45-60 minutes unless noted. Schedule subject to change.</p>
+        <p class="text-sm text-gray-500 mt-4 text-center">All classes are 60 minutes. Private lessons available by appointment. Saturday & Sunday: Academy Closed</p>
+    </div>
+
+    <!-- Weekly Schedule Summary -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="bg-orange-50 rounded-xl p-6 border border-orange-200">
+            <h3 class="text-xl font-bold text-center mb-4">📅 Weekly Class Schedule</h3>
+            <div class="grid md:grid-cols-5 gap-4 text-center">
+                <div class="bg-white p-3 rounded-lg">
+                    <p class="font-bold text-orange-600">4:00 PM - 5:00 PM</p>
+                    <p class="text-sm">Little Tigers (3-5)</p>
+                    <p class="text-xs text-gray-500">Taekwondo, Boxing, Gymnastics, Fitness, MMA</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <p class="font-bold text-orange-600">5:00 PM - 6:00 PM</p>
+                    <p class="text-sm">Junior Program (6-12)</p>
+                    <p class="text-xs text-gray-500">Taekwondo, Boxing, Gymnastics, Fitness, MMA</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <p class="font-bold text-orange-600">6:00 PM - 7:00 PM</p>
+                    <p class="text-sm">Teen & Adult (13-49)</p>
+                    <p class="text-xs text-gray-500">Taekwondo, Boxing, Gymnastics, Fitness, MMA</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <p class="font-bold text-orange-600">7:00 PM - 8:00 PM</p>
+                    <p class="text-sm">Senior Citizens (50+)</p>
+                    <p class="text-xs text-gray-500">Taekwondo, Boxing, Gymnastics, Fitness, MMA</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <p class="font-bold text-orange-600">8:00 PM - 9:00 PM</p>
+                    <p class="text-sm">Family Classes</p>
+                    <p class="text-xs text-gray-500">All disciplines, All ages together</p>
+                </div>
+            </div>
+            <div class="text-center mt-4 pt-4 border-t border-orange-200">
+                <p class="text-gray-600"><span class="font-bold">📌 Note:</span> Each time slot offers different disciplines on different days</p>
+                <p class="text-gray-600 mt-1">Monday: Taekwondo | Tuesday: Boxing | Wednesday: Gymnastics | Thursday: Fitness | Friday: MMA</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Reference Legend -->
+    <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="bg-gray-100 rounded-xl p-4">
+            <h3 class="font-bold mb-2">📌 Class Types & Age Groups:</h3>
+            <div class="flex flex-wrap gap-3 text-sm justify-center">
+                <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded">🐯 Little Tigers (3-5)</span>
+                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded">⭐ Junior (6-12)</span>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">💪 Teen/Adult (13-49)</span>
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded">👴 Senior (50+)</span>
+                <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded">👨‍👩‍👧‍👦 Family (All Ages)</span>
+            </div>
+            <div class="flex flex-wrap gap-3 text-sm justify-center mt-3">
+                <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded">🥋 Taekwondo</span>
+                <span class="px-2 py-1 bg-red-100 text-red-700 rounded">🥊 Boxing</span>
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded">🤸 Gymnastics</span>
+                <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded">🏋️ Fitness</span>
+                <span class="px-2 py-1 bg-gray-700 text-white rounded">💪 MMA</span>
+            </div>
+        </div>
     </div>
 
     <!-- Pricing Section -->
@@ -138,9 +328,8 @@
                     <p class="text-3xl font-bold text-orange-600 mb-4">Rs. 7,900<span class="text-sm text-gray-500">/mo</span></p>
                     <ul class="text-left mb-6 space-y-2">
                         <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 2 classes per week</li>
-                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Uniform discount</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Single discipline access</li>
                         <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Basic belt testing</li>
-                        <li class="flex items-center text-gray-400"><span class="text-red-500 mr-2">✗</span> Tournament entry</li>
                     </ul>
                     <a href="register.html" class="block w-full bg-orange-600 text-white py-2 rounded-full hover:bg-orange-700">Enroll Now</a>
                 </div>
@@ -149,12 +338,12 @@
                 <div class="bg-white p-6 rounded-2xl shadow-lg text-center border-4 border-orange-600 relative">
                     <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-orange-600 text-white px-4 py-1 rounded-full text-sm">Most Popular</div>
                     <h3 class="text-xl font-bold mb-2">Family</h3>
-                    <p class="text-3xl font-bold text-orange-600 mb-4">Rs.20,900<span class="text-sm text-gray-500">/mo</span></p>
+                    <p class="text-3xl font-bold text-orange-600 mb-4">Rs. 14,900<span class="text-sm text-gray-500">/mo</span></p>
                     <ul class="text-left mb-6 space-y-2">
                         <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Up to 4 family members</li>
-                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 3 classes per week each</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Unlimited classes</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> All disciplines access</li>
                         <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Uniforms included</li>
-                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> All belt testing</li>
                     </ul>
                     <a href="register.html" class="block w-full bg-orange-600 text-white py-2 rounded-full hover:bg-orange-700">Enroll Now</a>
                 </div>
@@ -162,12 +351,12 @@
                 <!-- Premium Plan -->
                 <div class="bg-white p-6 rounded-2xl shadow-lg text-center">
                     <h3 class="text-xl font-bold mb-2">Premium</h3>
-                    <p class="text-3xl font-bold text-orange-600 mb-4">Rs.12,900<span class="text-sm text-gray-500">/mo</span></p>
+                    <p class="text-3xl font-bold text-orange-600 mb-4">Rs. 12,900<span class="text-sm text-gray-500">/mo</span></p>
                     <ul class="text-left mb-6 space-y-2">
                         <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Unlimited classes</li>
-                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Private lesson included</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> All disciplines access</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Private lesson monthly</li>
                         <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Tournament training</li>
-                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Gear discount</li>
                     </ul>
                     <a href="register.html" class="block w-full bg-orange-600 text-white py-2 rounded-full hover:bg-orange-700">Enroll Now</a>
                 </div>
@@ -199,7 +388,7 @@
                 </div>
             </div>
             <div class="text-center text-sm text-gray-400 mt-4 pt-4 border-t border-gray-800">
-                <p>🏪 Open: Monday-Friday 3PM-8PM | Saturday 9AM-1PM | Sunday Closed</p>
+                <p>🏪 Open: Monday-Friday 4PM-9PM | Saturday & Sunday: Closed</p>
                 <p class="mt-2">📍 Hospital Road, Manga Mandi Lahore | 📞 <a href="tel:03174084613" class="hover:text-white">0317-4084613</a></p>
             </div>
         </div>
@@ -207,24 +396,30 @@
 
     <!-- Filter Script -->
     <script>
-        function filterClasses(level) {
-            const rows = document.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                if(level === 'all') {
-                    row.style.display = '';
+        function filterSchedule(category) {
+            const items = document.querySelectorAll('.schedule-item');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-filter') === category) {
+                    btn.classList.add('active');
+                    btn.classList.remove('bg-gray-200');
                 } else {
-                    const cells = row.querySelectorAll('td');
-                    let hasClass = false;
-                    for(let i = 1; i < cells.length; i++) {
-                        if(cells[i].textContent.includes(level)) {
-                            hasClass = true;
-                            break;
-                        }
-                    }
-                    row.style.display = hasClass ? '' : 'none';
+                    btn.classList.remove('active');
+                    btn.classList.add('bg-gray-200');
+                }
+            });
+            
+            items.forEach(item => {
+                if (category === 'all' || item.getAttribute('data-category') === category) {
+                    item.parentElement.style.display = '';
+                } else {
+                    item.parentElement.style.display = 'none';
                 }
             });
         }
+        
+        filterSchedule('all');
     </script>
 
     <!-- WhatsApp Button -->
